@@ -40,6 +40,11 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [categories, filterCategory, favoritesOnly]);
 
+  // 화면 전환 시 이전 화면의 스크롤 위치가 남아 상세/폼이 잘려 보이는 것 방지
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [view]);
+
   function reloadDrinks() {
     setLoading(true);
     fetchDrinks({ category: filterCategory, favoritesOnly })
