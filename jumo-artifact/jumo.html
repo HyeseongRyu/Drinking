@@ -600,10 +600,14 @@
   var ANALYSIS_SCHEMA = '{"candidates": ["가능성 높은 제품명 후보를 유력한 순서로 1~4개. 확신이 전혀 없으면 빈 배열 []"], "type": "종류/스타일 (예: 싱글몰트 위스키, 필스너 맥주, IPA, 스파클링 와인, 생막걸리 등, 모르면 null)", "abv": "도수(%), 예: \"40%\" (모르면 null)", "origin": "생산 국가나 지역 (모르면 null)", "priceRange": "한국 소매 기준 대략적인 가격대, 예: \"7만~9만원대\" (모르면 null)", "history": "브랜드나 술에 대한 간단한 역사/배경 1~2문장 (모르면 null)", "note": "추정했거나 확실하지 않은 부분에 대한 설명 (없으면 null)"}';
 
   var ANALYSIS_RULES = '아래 정보를 보고 어떤 술인지 추정해서 JSON 형식으로만 답해주세요.\n' +
-    '- candidates: 제품명 후보를 유력한 순서로 최대 4개까지. 짐작조차 어려우면 빈 배열로 두세요.\n' +
+    '- candidates: 제품명 후보를 유력한 순서로 최대 4개까지.\n' +
+    '- 입력이 줄임말·애칭·일부만 적힌 이름일 수 있습니다. 그럴 땐 그 조각으로 시작하거나 그렇게 불리는 실제 제품의 정식 명칭으로 넓혀서 후보를 내세요.\n' +
+    '  (예: "Feige" → 독일 무화과 리큐르 "Kleiner Feigling" 같은 식)\n' +
+    '- 외국어 이름이면 원어 뜻을 단서로 삼고, 한국에 수입되지 않은 제품도 후보에 넣으세요.\n' +
+    '- 조금이라도 짚이는 게 있으면 note에 "추정"이라고 밝히고 후보를 내세요. 빈 배열은 정말 아무 단서도 없을 때만.\n' +
     '- 나머지 필드는 candidates의 첫 번째 후보를 기준으로 작성하세요.\n' +
-    '- 확실하지 않은 값은 null로 두고, 짐작한 내용은 note에 "추정"이라고 밝혀주세요.\n' +
-    '- 술이 아닌 것 같으면 모든 값을 null(candidates는 [])로 두세요.\n' +
+    '- 확실하지 않은 값은 null로 두세요. 사실이 아닌 값을 지어내지는 마세요.\n' +
+    '- 술과 전혀 관계없는 입력이면 모든 값을 null(candidates는 [])로 두세요.\n' +
     '- 다른 설명 없이 JSON만 출력하세요.\n\n' + ANALYSIS_SCHEMA + '\n\n';
 
   function escapeHtml(str) {
@@ -861,8 +865,8 @@
         '<p class="ai-status" style="font-size:0.78rem;">이름 · 설명은 직접 입력해주세요.</p>';
     }
     if (draft.aiLoading) {
-      var what = draft.aiSource === 'photo'
-        ? '사진으로 이름과 정보를 찾고 있어요...'
+      var what = draft.aiRetrying ? '잘 안 알려진 술 같아요. 더 자세히 찾아볼게요...'
+        : draft.aiSource === 'photo' ? '사진으로 이름과 정보를 찾고 있어요...'
         : '‘' + escapeHtml((draft.name || '').trim()) + '’ 정보를 찾고 있어요...';
       return '<p class="ai-status">' + ICONS.sparkle + ' ' + what + '</p>';
     }
@@ -1052,10 +1056,20 @@
     if (opts.name) draft.lastAnalyzedName = opts.name;
     syncAiUi();
     try {
+      var prompt = buildAnalysisPrompt(draft, opts);
       var callOpts = { modelTier: 'quick' };
       if (opts.images) callOpts.images = opts.images;
-      var raw = await sample.json(buildAnalysisPrompt(draft, opts), callOpts);
-      applyAiResult(draft, normalizeAiResult(raw), opts);
+      var result = normalizeAiResult(await sample.json(prompt, callOpts));
+      // 빠른 모델은 덜 알려졌거나 수입 안 된 술을 못 알아보는 일이 잦다.
+      // 후보가 하나도 안 나왔을 때만 더 아는 모델로 한 번 더 물어본다.
+      if (result && !result.candidates.length) {
+        draft.aiRetrying = true;
+        syncAiUi();
+        callOpts.modelTier = 'default';
+        var deeper = normalizeAiResult(await sample.json(prompt, callOpts));
+        if (deeper && deeper.candidates.length) result = deeper;
+      }
+      applyAiResult(draft, result, opts);
     } catch (err) {
       if (err && err.code === 'not_granted') {
         if (opts.images) state.sampleImagesAvailable = false;
@@ -1066,6 +1080,7 @@
       if (opts.name) draft.lastAnalyzedName = null;
     } finally {
       draft.aiLoading = false;
+      draft.aiRetrying = false;
       renderPreservingFocus();
     }
   }
@@ -1274,7 +1289,7 @@
   function freshFormDraft() {
     return {
       photoFile: null, aiResult: null, aiLoading: false, aiError: null,
-      aiSource: null, descriptionFromAi: false, lastAnalyzedName: null,
+      aiSource: null, aiRetrying: false, descriptionFromAi: false, lastAnalyzedName: null,
       candidates: [], infoForName: null, categoryPicked: false
     };
   }
