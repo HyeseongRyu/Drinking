@@ -1,0 +1,1107 @@
+<title>주모</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap">
+<style>
+  :root {
+    --bg: #f2eef1;
+    --surface: #ffffff;
+    --surface-2: #eae2e8;
+    --ink: #201a24;
+    --muted: #786f7f;
+    --line: #e2d9df;
+    --wine: #93314c;
+    --wine-solid: #93314c;
+    --gold: #b3872f;
+    --danger: #a8382a;
+    --danger-solid: #a8382a;
+    --heart: #c23d5c;
+    --on-solid: #ffffff;
+    --shadow: 0 2px 14px rgba(32, 22, 30, 0.08);
+    --shadow-lg: 0 22px 60px rgba(32, 22, 30, 0.16);
+    color-scheme: light;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #17131a;
+      --surface: #221d27;
+      --surface-2: #2b2530;
+      --ink: #f1ecee;
+      --muted: #a89aa8;
+      --line: #372e3d;
+      --wine: #e28ba0;
+      --wine-solid: #a8415d;
+      --gold: #d9a94f;
+      --danger: #e2a89c;
+      --danger-solid: #b1493a;
+      --heart: #ea94a8;
+      --shadow: 0 2px 14px rgba(0, 0, 0, 0.4);
+      --shadow-lg: 0 22px 60px rgba(0, 0, 0, 0.55);
+      color-scheme: dark;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #17131a;
+    --surface: #221d27;
+    --surface-2: #2b2530;
+    --ink: #f1ecee;
+    --muted: #a89aa8;
+    --line: #372e3d;
+    --wine: #e28ba0;
+    --wine-solid: #a8415d;
+    --gold: #d9a94f;
+    --danger: #e2a89c;
+    --danger-solid: #b1493a;
+    --heart: #ea94a8;
+    --shadow: 0 2px 14px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 22px 60px rgba(0, 0, 0, 0.55);
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'IBM Plex Sans KR', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif;
+    font-variant-numeric: tabular-nums;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  button, input, textarea { font: inherit; color: inherit; }
+  button { cursor: pointer; background: none; border: none; }
+  :focus-visible { outline: 2px solid var(--wine); outline-offset: 2px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+  }
+
+  .app-shell {
+    max-width: 720px;
+    margin: 0 auto;
+    min-height: 100vh;
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+  }
+  @media (min-width: 760px) {
+    .app-shell { box-shadow: var(--shadow-lg); }
+  }
+
+  .app-header {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: max(14px, env(safe-area-inset-top)) 18px 14px;
+    background: var(--bg);
+    border-bottom: 1px solid var(--line);
+  }
+  .app-header h1 {
+    margin: 0;
+    flex: 1;
+    text-align: center;
+    font-family: 'Gowun Batang', serif;
+    font-weight: 700;
+    font-size: 1.2rem;
+    letter-spacing: 0.01em;
+  }
+  .icon-btn, .icon-spacer {
+    width: 38px;
+    height: 38px;
+    flex-shrink: 0;
+  }
+  .icon-btn {
+    border-radius: 50%;
+    background: var(--surface-2);
+    color: var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .icon-btn svg { width: 18px; height: 18px; }
+  .icon-btn.accent { background: var(--wine-solid); color: var(--on-solid); }
+
+  .app-main { flex: 1; padding: 18px 18px 100px; }
+
+  /* filter bar */
+  .filter-bar { display: flex; flex-direction: column; gap: 12px; margin-bottom: 18px; }
+  .filter-rail { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
+  .filter-rail::-webkit-scrollbar { display: none; }
+
+  .chip {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--ink);
+    font-size: 0.86rem;
+    white-space: nowrap;
+  }
+  .chip svg { width: 15px; height: 15px; flex-shrink: 0; }
+  .chip.active { background: var(--wine-solid); border-color: var(--wine-solid); color: var(--on-solid); }
+
+  .fav-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    align-self: flex-start;
+    font-size: 0.88rem;
+    color: var(--muted);
+  }
+  .fav-toggle svg { width: 15px; height: 15px; color: var(--heart); }
+  .fav-toggle input { accent-color: var(--heart); width: 16px; height: 16px; }
+
+  .toggle-row { display: flex; gap: 18px; flex-wrap: wrap; }
+  .owner-row { font-size: 0.8rem; color: var(--muted); }
+  .owner-row button { color: var(--wine); text-decoration: underline; padding: 0; font-size: inherit; }
+
+  .owner-badge {
+    position: absolute; top: 8px; left: 8px; padding: 3px 9px; border-radius: 999px;
+    background: rgba(20, 14, 18, 0.55); color: #fff; font-size: 0.68rem; font-weight: 600;
+  }
+  .detail-owner-badge {
+    align-self: flex-start; padding: 5px 12px; border-radius: 999px;
+    background: var(--surface-2); color: var(--muted); font-size: 0.78rem;
+  }
+
+  /* grid + card */
+  .drink-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(152px, 1fr)); gap: 14px; }
+
+  .drink-card {
+    background: var(--surface);
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    transition: transform 0.12s ease;
+  }
+  .drink-card:active { transform: scale(0.98); }
+
+  .drink-card-media, .detail-media {
+    position: relative;
+    background: var(--surface-2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted);
+    overflow: hidden;
+  }
+  .drink-card-media { aspect-ratio: 1 / 1; }
+  .drink-card-media img, .detail-media img { width: 100%; height: 100%; object-fit: cover; }
+  .drink-card-icon svg { width: 46px; height: 46px; }
+
+  .favorite-chip {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(20, 14, 18, 0.45);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(2px);
+  }
+  .favorite-chip svg { width: 16px; height: 16px; }
+  .favorite-chip.active { background: rgba(255, 255, 255, 0.92); color: var(--heart); }
+  .favorite-chip.large { width: 44px; height: 44px; }
+  .favorite-chip.large svg { width: 20px; height: 20px; }
+
+  .drink-card-body { padding: 11px 13px 13px; display: flex; flex-direction: column; gap: 5px; }
+  .drink-card-cat, .detail-cat {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 0.74rem; color: var(--muted);
+  }
+  .drink-card-cat svg, .detail-cat svg { width: 13px; height: 13px; }
+  .drink-card-name {
+    margin: 0; font-family: 'Gowun Batang', serif; font-weight: 700;
+    font-size: 1.02rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .drink-card-score { display: flex; align-items: center; gap: 8px; margin-top: 2px; }
+  .score-num { font-weight: 600; font-size: 0.86rem; color: var(--muted); flex-shrink: 0; }
+
+  .score-gauge {
+    position: relative; flex: 1; height: 6px; border-radius: 999px;
+    background: var(--surface-2); overflow: hidden;
+  }
+  .score-gauge-sm { height: 5px; }
+  .score-gauge-lg { height: 10px; }
+  .score-gauge-fill { position: absolute; inset: 0; background: var(--wine); border-radius: inherit; }
+  .overall-block .score-gauge-fill { background: linear-gradient(90deg, var(--wine), var(--gold)); }
+
+  .empty-state { text-align: center; padding: 70px 20px; color: var(--muted); }
+  .empty-mark svg { width: 44px; height: 44px; margin-bottom: 10px; opacity: 0.7; }
+  .empty-state p { margin: 4px 0; }
+
+  .status-screen { text-align: center; padding: 90px 24px; color: var(--muted); }
+  .status-sub { font-size: 0.85rem; margin-top: 6px; }
+
+  .setup-screen {
+    display: flex; flex-direction: column; align-items: center; text-align: center;
+    gap: 14px; padding: 40px 8px 20px;
+  }
+  .setup-screen h2 { margin: 0; font-family: 'Gowun Batang', serif; font-size: 1.3rem; }
+  .setup-desc { margin: 0; color: var(--muted); font-size: 0.9rem; line-height: 1.6; max-width: 340px; }
+  .setup-screen input[type="text"] {
+    width: 100%; max-width: 280px; background: var(--surface); border: 1px solid var(--line);
+    border-radius: 12px; padding: 13px 15px; font-size: 1rem; text-align: center;
+  }
+  .setup-screen input[type="text"]:focus { outline: 2px solid var(--wine); outline-offset: -1px; }
+  .setup-screen .form-actions { max-width: 280px; width: 100%; margin-top: 4px; }
+
+  .fab {
+    position: fixed;
+    bottom: max(24px, env(safe-area-inset-bottom));
+    right: max(24px, calc((100vw - 720px) / 2 + 24px));
+    width: 56px; height: 56px; border-radius: 50%;
+    background: var(--wine-solid); color: var(--on-solid);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: var(--shadow-lg); z-index: 15;
+  }
+  .fab svg { width: 24px; height: 24px; }
+  @media (max-width: 760px) { .fab { right: 24px; } }
+
+  /* form */
+  .drink-form { display: flex; flex-direction: column; gap: 20px; }
+
+  .photo-picker {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    border-radius: 18px;
+    border: 2px dashed var(--line);
+    background: var(--surface);
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+  }
+  .photo-picker img { width: 100%; height: 100%; object-fit: cover; }
+  .photo-placeholder { display: flex; flex-direction: column; align-items: center; gap: 8px; color: var(--muted); }
+  .photo-placeholder svg { width: 30px; height: 30px; }
+  .photo-loading { color: var(--muted); font-size: 0.92rem; }
+  .photo-remove {
+    position: absolute; top: 10px; right: 10px; width: 34px; height: 34px; border-radius: 50%;
+    background: rgba(20, 14, 18, 0.55); color: #fff; display: flex; align-items: center; justify-content: center;
+  }
+  .photo-remove svg { width: 16px; height: 16px; }
+
+  .photo-actions { display: flex; gap: 10px; }
+  .photo-actions .btn { display: flex; align-items: center; justify-content: center; gap: 7px; }
+  .photo-actions .btn svg { width: 16px; height: 16px; }
+
+  .ai-panel {
+    background: var(--surface); border: 1px dashed var(--line); border-radius: 14px;
+    padding: 14px; display: flex; flex-direction: column; gap: 10px;
+  }
+  .ai-trigger { display: flex; align-items: center; justify-content: center; gap: 8px; }
+  .ai-trigger svg { width: 16px; height: 16px; color: var(--gold); }
+  .ai-status { margin: 0; color: var(--muted); font-size: 0.9rem; display: flex; align-items: center; gap: 7px; }
+  .ai-status svg { width: 15px; height: 15px; color: var(--gold); flex-shrink: 0; }
+  .ai-status.ai-error { color: var(--danger); }
+  .ai-result { display: flex; flex-direction: column; gap: 10px; }
+  .ai-name-suggestion {
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    padding-bottom: 10px; border-bottom: 1px solid var(--line);
+  }
+  .ai-name-label { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.03em; flex-shrink: 0; }
+  .ai-name-value { font-family: 'Gowun Batang', serif; font-weight: 700; font-size: 1.05rem; flex: 1; min-width: 0; }
+  .ai-fields { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px 14px; margin: 0; }
+  .ai-fields > div { display: flex; flex-direction: column; gap: 2px; }
+  .ai-fields dt { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.03em; margin: 0; }
+  .ai-fields dd { margin: 0; font-size: 0.92rem; }
+  .ai-history { margin: 0; font-size: 0.88rem; line-height: 1.5; }
+  .ai-note { margin: 0; font-size: 0.82rem; color: var(--muted); }
+  .ai-disclaimer { margin: 0; font-size: 0.76rem; color: var(--muted); }
+  .ai-actions { display: flex; gap: 8px; align-items: center; }
+  .btn-sm { flex: none; padding: 9px 14px; font-size: 0.85rem; }
+  .ai-applied { font-size: 0.85rem; color: var(--muted); }
+
+  .field { display: flex; flex-direction: column; gap: 9px; }
+  .field-label { font-size: 0.84rem; font-weight: 600; color: var(--muted); }
+  .field-label em { font-style: normal; font-weight: 400; opacity: 0.8; }
+
+  .field input[type="text"], .field textarea {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
+    padding: 13px 15px; font-size: 1rem; resize: vertical;
+  }
+  .field input[type="text"]:focus, .field textarea:focus { outline: 2px solid var(--wine); outline-offset: -1px; }
+
+  .category-rail { display: flex; flex-wrap: wrap; gap: 8px; }
+
+  .rating-panel {
+    display: flex; flex-direction: column; gap: 14px;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 14px;
+    padding: 16px;
+  }
+  .rating-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .rating-row-label { font-size: 0.92rem; color: var(--muted); min-width: 64px; }
+  .segmented { display: flex; gap: 6px; }
+  .segment {
+    width: 40px; height: 40px; border-radius: 10px;
+    background: var(--surface-2); color: var(--muted);
+    font-weight: 600; font-size: 0.95rem;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .segment.active { background: var(--wine-solid); color: var(--on-solid); }
+
+  .overall-preview {
+    margin-top: 10px; display: flex; align-items: baseline; gap: 6px;
+    font-size: 0.92rem; color: var(--muted);
+  }
+  .overall-preview strong { font-family: 'Gowun Batang', serif; font-size: 1.3rem; color: var(--wine); }
+  .overall-preview .of5 { font-size: 0.82rem; }
+
+  .form-error { color: var(--danger); font-size: 0.9rem; margin: 0; }
+
+  .form-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+  .btn { flex: 1; min-width: 90px; padding: 14px 16px; border-radius: 13px; font-size: 0.97rem; font-weight: 600; }
+  .btn-primary { background: var(--wine-solid); color: var(--on-solid); }
+  .btn-primary:disabled { opacity: 0.45; }
+  .btn-secondary { background: var(--surface-2); color: var(--ink); }
+  .btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--line); }
+  .btn-danger { background: var(--danger-solid); color: var(--on-solid); }
+  .btn-danger-outline { background: transparent; color: var(--danger); border: 1px solid var(--danger); }
+
+  /* detail */
+  .detail-media { aspect-ratio: 4 / 3; border-radius: 18px; }
+  .detail-icon svg { width: 68px; height: 68px; }
+  .detail-body { padding-top: 18px; display: flex; flex-direction: column; gap: 11px; }
+  .detail-name { margin: 0; font-family: 'Gowun Batang', serif; font-weight: 700; font-size: 1.5rem; text-wrap: balance; }
+  .detail-date { margin: 0; color: var(--muted); font-size: 0.85rem; }
+
+  .overall-block {
+    display: flex; align-items: center; gap: 14px;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 14px;
+    padding: 16px; margin: 4px 0;
+  }
+  .overall-num { font-family: 'Gowun Batang', serif; font-weight: 700; font-size: 1.7rem; color: var(--wine); flex-shrink: 0; }
+
+  .criteria-panel {
+    display: flex; flex-direction: column; gap: 12px;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px;
+  }
+  .criteria-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+  .criteria-row > span:first-child { color: var(--muted); font-size: 0.92rem; flex-shrink: 0; min-width: 60px; }
+  .criteria-value { display: flex; align-items: center; gap: 10px; flex: 1; max-width: 200px; }
+
+  .memo-block {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px;
+    display: flex; flex-direction: column; gap: 7px;
+  }
+  .memo-block p { margin: 0; white-space: pre-wrap; line-height: 1.6; }
+</style>
+
+<div id="app">
+  <header class="app-header">
+    <span class="icon-spacer"></span>
+    <h1>주모</h1>
+    <span class="icon-spacer"></span>
+  </header>
+  <main class="app-main">
+    <div class="status-screen"><p>불러오는 중...</p></div>
+  </main>
+</div>
+
+<script>
+(function () {
+  var ICONS = {
+    back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5 8 12l7 7"/></svg>',
+    plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>',
+    camera: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l1.5-2h7L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1Z"/><circle cx="12" cy="13.5" r="3.4"/></svg>',
+    trash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h14M9 7V4.8A1 1 0 0 1 10 4h4a1 1 0 0 1 1 .8V7m1 0-.7 12.2a1.6 1.6 0 0 1-1.6 1.4H10.3a1.6 1.6 0 0 1-1.6-1.4L8 7"/></svg>',
+    image: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="14" rx="2.2"/><circle cx="9" cy="10" r="1.6"/><path d="m5 17 4.5-4.5a2 2 0 0 1 2.8 0L17 17"/></svg>',
+    sparkle: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c.4 3.2 1 4.8 2.2 6C15.4 9.2 17 9.8 20 10c-3.2.4-4.8 1-6 2.2C12.8 13.4 12.2 15 12 18c-.4-3.2-1-4.8-2.2-6C8.6 10.8 7 10.2 4 10c3.2-.4 4.8-1 6-2.2C11.2 6.6 11.8 5 12 2Z"/></svg>'
+  };
+  function heartIcon(filled) {
+    return filled
+      ? '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7.5-4.6-10-9.3C.4 8.1 2.2 4.5 5.7 4c2-.3 3.8.6 6.3 3.3C14.5 4.6 16.3 3.7 18.3 4c3.5.5 5.3 4.1 3.7 7.7C19.5 16.4 12 21 12 21Z"/></svg>'
+      : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7.5-4.6-10-9.3C.4 8.1 2.2 4.5 5.7 4c2-.3 3.8.6 6.3 3.3C14.5 4.6 16.3 3.7 18.3 4c3.5.5 5.3 4.1 3.7 7.7C19.5 16.4 12 21 12 21Z"/></svg>';
+  }
+
+  var CATEGORIES = {
+    beer: {
+      label: '맥주',
+      icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h9v11a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V8Z"/><path d="M15 10h2a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2h-2"/><path d="M6 8c0-1.6 1-3 3-3s2 1.5 3 1 1.5-2 3-1"/></svg>',
+      criteria: [
+        { key: 'aroma', label: '향' },
+        { key: 'carbonation', label: '탄산감' },
+        { key: 'bitterness', label: '쓴맛' },
+        { key: 'finish', label: '목넘김' }
+      ]
+    },
+    makgeolli: {
+      label: '막걸리',
+      icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h16l-1.5 8.2a3 3 0 0 1-3 2.5h-7a3 3 0 0 1-3-2.5L4 9Z"/><path d="M4 9a8 2 0 0 0 16 0"/><path d="M9 5.3c.8-1 2-1 3 0"/></svg>',
+      criteria: [
+        { key: 'sweetness', label: '단맛' },
+        { key: 'acidity', label: '산미' },
+        { key: 'carbonation', label: '탄산감' },
+        { key: 'finish', label: '목넘김' }
+      ]
+    },
+    wine: {
+      label: '와인',
+      icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h10c0 5-2 8-5 8s-5-3-5-8Z"/><path d="M12 11v7"/><path d="M8.5 21h7"/></svg>',
+      criteria: [
+        { key: 'aroma', label: '향' },
+        { key: 'acidity', label: '산미' },
+        { key: 'body', label: '바디감' },
+        { key: 'finish', label: '여운' }
+      ]
+    },
+    whiskey: {
+      label: '위스키',
+      icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4h12l-1 16.2a1 1 0 0 1-1 .8H8a1 1 0 0 1-1-.8L6 4Z"/><path d="M6.6 9h10.8"/><rect x="9.3" y="11" width="3" height="3" rx="0.5" transform="rotate(15 10.8 12.5)"/></svg>',
+      criteria: [
+        { key: 'aroma', label: '향' },
+        { key: 'smokiness', label: '스모키함' },
+        { key: 'warmth', label: '도수감' },
+        { key: 'finish', label: '피니시' }
+      ]
+    },
+    soju: {
+      label: '소주',
+      icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2h4v3l1.5 2v14a1 1 0 0 1-1 1h-5a1 1 0 0 1-1-1V7L10 5V2Z"/><path d="M9.5 12h5"/></svg>',
+      criteria: [
+        { key: 'smoothness', label: '부드러움' },
+        { key: 'sweetness', label: '단맛' },
+        { key: 'burn', label: '알코올감' },
+        { key: 'finish', label: '목넘김' }
+      ]
+    },
+    other: {
+      label: '기타',
+      icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h14l-7 8L5 4Z"/><path d="M12 12v7"/><path d="M8.5 19h7"/><path d="m15 6.5 2-2"/></svg>',
+      criteria: [
+        { key: 'aroma', label: '향' },
+        { key: 'taste', label: '맛' },
+        { key: 'texture', label: '질감' },
+        { key: 'finish', label: '여운' }
+      ]
+    }
+  };
+
+  var db = null;
+  var sample = null;
+  var sampleReady = null;
+  var STORAGE_KEY = 'tastingNotes.ownerName';
+  var state = {
+    dbReady: null,
+    sampleImagesAvailable: false,
+    drinks: [],
+    view: 'list',
+    filterCategory: 'all',
+    favoritesOnly: false,
+    showAllOwners: false,
+    myName: '',
+    setupDraftName: '',
+    setupIsInitial: true,
+    setupError: null,
+    selectedId: null,
+    editingId: null,
+    deleteConfirmId: null,
+    submitting: false,
+    formError: null,
+    formDraft: null
+  };
+
+  var AI_PROMPT = '사진 속 술의 라벨이나 병을 보고 아래 JSON 형식으로만 답해주세요. 라벨 문구를 최대한 읽고 활용하세요. 확실하지 않은 값은 null로 두고, 짐작한 내용은 note에 "추정"이라고 밝혀주세요. 다른 설명 없이 JSON만 출력하세요.\n\n' +
+    '{"name": "제품명 (브랜드명 포함, 모르면 null)", "type": "종류/스타일 (예: 싱글몰트 위스키, 블렌디드 위스키, 필스너 맥주, IPA, 스파클링 와인 등, 모르면 null)", "origin": "생산 국가나 지역 (모르면 null)", "priceRange": "한국 소매 기준 대략적인 가격대, 예: \"7만~9만원대\" (모르면 null)", "history": "브랜드나 술에 대한 간단한 역사/배경 1~2문장 (모르면 null)", "note": "라벨이 잘 안 보이거나 추정한 부분에 대한 설명 (없으면 null)"}';
+
+  function escapeHtml(str) {
+    return String(str == null ? '' : str).replace(/[&<>"']/g, function (m) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m];
+    });
+  }
+
+  function friendlyDbError(err) {
+    if (!err) return '저장 중 문제가 발생했어요.';
+    switch (err.code) {
+      case 'quota_exceeded': return '저장 공간이 가득 찼어요. 오래된 기록을 정리해주세요.';
+      case 'resource_exhausted': return '요청이 많아요. 잠시 후 다시 시도해주세요.';
+      case 'invalid_argument': return '저장할 수 없는 내용이에요. (사진이 너무 클 수 있어요)';
+      case 'revoked': return '접근 권한이 만료됐어요. 페이지를 새로고침해주세요.';
+      default: return err.message || '저장 중 문제가 발생했어요.';
+    }
+  }
+
+  function loadImageFromFile(file) {
+    return new Promise(function (resolve, reject) {
+      var url = URL.createObjectURL(file);
+      var img = new Image();
+      img.onload = function () { resolve(img); URL.revokeObjectURL(url); };
+      img.onerror = function (e) { URL.revokeObjectURL(url); reject(e); };
+      img.src = url;
+    });
+  }
+
+  function drawResized(img, maxDim, quality) {
+    var scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+    var w = Math.max(1, Math.round(img.width * scale));
+    var h = Math.max(1, Math.round(img.height * scale));
+    var canvas = document.createElement('canvas');
+    canvas.width = w; canvas.height = h;
+    var ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0, w, h);
+    return canvas.toDataURL('image/jpeg', quality);
+  }
+
+  function compressWithBudget(img, opts) {
+    var dim = opts.startDim, quality = opts.startQuality;
+    var out = drawResized(img, dim, quality);
+    var guard = 0;
+    while (out.length > opts.budgetChars && guard < 12) {
+      if (quality > opts.minQuality) quality = Math.max(opts.minQuality, quality - 0.1);
+      else dim = Math.max(opts.minDim, Math.round(dim * 0.85));
+      out = drawResized(img, dim, quality);
+      guard++;
+    }
+    return out;
+  }
+
+  async function preparePhoto(file) {
+    var img = await loadImageFromFile(file);
+    var photo = compressWithBudget(img, { startDim: 1000, minDim: 480, startQuality: 0.75, minQuality: 0.4, budgetChars: 200000 });
+    var thumb = compressWithBudget(img, { startDim: 260, minDim: 120, startQuality: 0.7, minQuality: 0.4, budgetChars: 25000 });
+    return { photo: photo, thumb: thumb };
+  }
+
+  function scoreGauge(value, size) {
+    var pct = Math.max(0, Math.min(100, (value / 5) * 100));
+    return '<div class="score-gauge score-gauge-' + size + '"><div class="score-gauge-fill" style="width:' + pct + '%"></div></div>';
+  }
+
+  function ratingRow(criterion, value) {
+    var segs = [1, 2, 3, 4, 5].map(function (n) {
+      return '<button type="button" class="segment ' + (value === n ? 'active' : '') + '" data-action="set-rating" data-key="' + criterion.key + '" data-value="' + n + '" aria-pressed="' + (value === n) + '">' + n + '</button>';
+    }).join('');
+    return '<div class="rating-row"><span class="rating-row-label">' + escapeHtml(criterion.label) + '</span><div class="segmented" role="radiogroup" aria-label="' + escapeHtml(criterion.label) + '">' + segs + '</div></div>';
+  }
+
+  function headerHtml() {
+    var titles = { list: '주모', form: '새 기록', editForm: '기록 수정', detail: '상세', setup: '닉네임 설정' };
+    var showBack = state.view !== 'list' && !(state.view === 'setup' && state.setupIsInitial);
+    return '<header class="app-header">' +
+      (showBack ? '<button type="button" class="icon-btn" data-action="back" aria-label="뒤로">' + ICONS.back + '</button>' : '<span class="icon-spacer"></span>') +
+      '<h1>' + titles[state.view] + '</h1>' +
+      (state.view === 'list' ? '<button type="button" class="icon-btn accent" data-action="open-add-form" aria-label="새 기록">' + ICONS.plus + '</button>' : '<span class="icon-spacer"></span>') +
+      '</header>';
+  }
+
+  function filterBarHtml() {
+    var chips = Object.keys(CATEGORIES).map(function (key) {
+      var cfg = CATEGORIES[key];
+      return '<button type="button" class="chip ' + (state.filterCategory === key ? 'active' : '') + '" data-action="set-filter-category" data-category="' + key + '">' + cfg.icon + escapeHtml(cfg.label) + '</button>';
+    }).join('');
+    return '<div class="filter-bar"><div class="filter-rail">' +
+      '<button type="button" class="chip ' + (state.filterCategory === 'all' ? 'active' : '') + '" data-action="set-filter-category" data-category="all">전체</button>' +
+      chips + '</div>' +
+      '<div class="toggle-row">' +
+      '<label class="fav-toggle"><input type="checkbox" id="favorites-toggle" ' + (state.favoritesOnly ? 'checked' : '') + '>' + heartIcon(true) + ' 즐겨찾기만</label>' +
+      '<label class="fav-toggle"><input type="checkbox" id="show-all-toggle" ' + (state.showAllOwners ? 'checked' : '') + '>다같이 보기</label>' +
+      '</div>' +
+      '<div class="owner-row">' + escapeHtml(state.myName) + '님으로 기록 중 · <button type="button" data-action="change-name">이름 바꾸기</button></div>' +
+      '</div>';
+  }
+
+  function drinkCardHtml(d) {
+    var cfg = CATEGORIES[d.category];
+    var media = d.thumb || d.photo;
+    return '<div class="drink-card" data-action="open-detail" data-id="' + d.id + '" role="button" tabindex="0">' +
+      '<div class="drink-card-media">' +
+      (media ? '<img src="' + media + '" alt="' + escapeHtml(d.name) + '" loading="lazy">' : '<span class="drink-card-icon">' + cfg.icon + '</span>') +
+      (state.showAllOwners && d.owner ? '<span class="owner-badge">' + escapeHtml(d.owner) + '</span>' : '') +
+      '<button type="button" class="favorite-chip ' + (d.favorite ? 'active' : '') + '" data-action="toggle-favorite" data-id="' + d.id + '" data-current="' + (!!d.favorite) + '" aria-label="즐겨찾기">' + heartIcon(d.favorite) + '</button>' +
+      '</div>' +
+      '<div class="drink-card-body">' +
+      '<span class="drink-card-cat">' + cfg.icon + escapeHtml(cfg.label) + '</span>' +
+      '<h3 class="drink-card-name">' + escapeHtml(d.name) + '</h3>' +
+      '<div class="drink-card-score">' + scoreGauge(d.overallScore, 'sm') + '<span class="score-num">' + d.overallScore.toFixed(1) + '</span></div>' +
+      '</div></div>';
+  }
+
+  function emptyStateHtml(noneAtAll) {
+    if (noneAtAll) {
+      return '<div class="empty-state"><div class="empty-mark">' + CATEGORIES.other.icon + '</div><p>아직 기록이 없어요.</p><p>오늘 마신 술을 남겨보세요.</p></div>';
+    }
+    return '<div class="empty-state"><p>조건에 맞는 기록이 없어요.</p></div>';
+  }
+
+  function listViewHtml() {
+    // owner가 없는 기록(이 기능이 생기기 전에 만든 것)은 누구 것인지 알 수 없으니 숨기지 않는다
+    var mine = state.showAllOwners ? state.drinks : state.drinks.filter(function (d) { return !d.owner || d.owner === state.myName; });
+    var drinks = mine;
+    if (state.filterCategory !== 'all') drinks = drinks.filter(function (d) { return d.category === state.filterCategory; });
+    if (state.favoritesOnly) drinks = drinks.filter(function (d) { return d.favorite; });
+    var body = drinks.length === 0 ? emptyStateHtml(mine.length === 0) : '<div class="drink-grid">' + drinks.map(drinkCardHtml).join('') + '</div>';
+    return filterBarHtml() + body + '<button type="button" class="fab" data-action="open-add-form" aria-label="새 기록">' + ICONS.plus + '</button>';
+  }
+
+  function aiPanelHtml(draft) {
+    if (!state.sampleImagesAvailable || !draft.photo) return '';
+    var inner;
+    if (draft.aiLoading) {
+      inner = '<p class="ai-status">' + ICONS.sparkle + ' 사진으로 이름과 정보를 찾고 있어요...</p>';
+    } else if (draft.aiError) {
+      inner = '<p class="ai-status ai-error">' + escapeHtml(draft.aiError) + '</p>' +
+        '<button type="button" class="btn btn-ghost btn-sm" data-action="analyze-photo">다시 시도</button>';
+    } else if (draft.aiResult) {
+      var r = draft.aiResult;
+      var fields = '';
+      if (r.type) fields += '<div><dt>종류</dt><dd>' + escapeHtml(r.type) + '</dd></div>';
+      if (r.origin) fields += '<div><dt>원산지</dt><dd>' + escapeHtml(r.origin) + '</dd></div>';
+      if (r.priceRange) fields += '<div><dt>가격대</dt><dd>' + escapeHtml(r.priceRange) + '</dd></div>';
+      var hasMemoInfo = !!(r.type || r.origin || r.priceRange || r.history || r.note);
+      var nameRow = r.name
+        ? ('<div class="ai-name-suggestion">' +
+            '<span class="ai-name-label">이름 제안</span>' +
+            '<span class="ai-name-value">' + escapeHtml(r.name) + '</span>' +
+            (draft.name.trim() === r.name
+              ? '<span class="ai-applied">적용됨</span>'
+              : '<button type="button" class="btn btn-secondary btn-sm" data-action="apply-ai-name">이름에 적용</button>') +
+          '</div>')
+        : '<p class="ai-status">이름은 알아보지 못했어요. 직접 입력해주세요.</p>';
+      inner = '<div class="ai-result">' +
+        nameRow +
+        (fields ? '<dl class="ai-fields">' + fields + '</dl>' : '') +
+        (r.history ? '<p class="ai-history">' + escapeHtml(r.history) + '</p>' : '') +
+        (r.note ? '<p class="ai-note">' + escapeHtml(r.note) + '</p>' : '') +
+        '<p class="ai-disclaimer">AI가 사진으로 추정한 정보라 실제와 다를 수 있어요.</p>' +
+        '<div class="ai-actions">' +
+        (hasMemoInfo
+          ? (draft.aiApplied
+            ? '<span class="ai-applied">메모에 추가됨</span>'
+            : '<button type="button" class="btn btn-secondary btn-sm" data-action="apply-ai-info">메모에 채우기</button>')
+          : '') +
+        '<button type="button" class="btn btn-ghost btn-sm" data-action="analyze-photo">다시 분석</button>' +
+        '</div></div>';
+    } else {
+      inner = '<button type="button" class="btn btn-ghost btn-sm ai-trigger" data-action="analyze-photo">' + ICONS.sparkle + ' 사진으로 이름 · 정보 추천받기</button>';
+    }
+    return '<div class="ai-panel">' + inner + '</div>';
+  }
+
+  function normalizeAiResult(r) {
+    if (!r || typeof r !== 'object') return null;
+    return {
+      name: r.name || null,
+      type: r.type || null,
+      origin: r.origin || null,
+      priceRange: r.priceRange || null,
+      history: r.history || null,
+      note: r.note || null
+    };
+  }
+
+  function friendlySampleError(err) {
+    if (!err) return '분석에 실패했어요.';
+    switch (err.code) {
+      case 'not_granted': return 'AI 분석 권한이 없어요.';
+      case 'images_unavailable': return '이 화면에서는 사진 분석을 쓸 수 없어요.';
+      case 'image_rejected': return '이 사진은 분석할 수 없어요. 다른 사진으로 시도해주세요.';
+      case 'rate_limited': return '요청이 많아요. 잠시 후 다시 시도해주세요.';
+      case 'session_expired': return '다시 로그인한 후 시도해주세요.';
+      case 'refused': return 'AI가 이 사진을 분석하지 않았어요.';
+      case 'empty_completion': return '분석 결과를 받지 못했어요. 다시 시도해주세요.';
+      case 'invalid_json': return '분석 결과 형식이 올바르지 않아요. 다시 시도해주세요.';
+      case 'cancelled': return '분석을 취소했어요.';
+      default: return '분석 중 문제가 발생했어요. 잠시 후 다시 시도해주세요.';
+    }
+  }
+
+  async function getAnalysisBlob(draft) {
+    if (draft.photoFile) return draft.photoFile;
+    if (draft.photo) {
+      try { var res = await fetch(draft.photo); return await res.blob(); } catch (e) { return null; }
+    }
+    return null;
+  }
+
+  async function analyzePhoto() {
+    var draft = state.formDraft;
+    var blob = await getAnalysisBlob(draft);
+    if (!blob) { draft.aiError = '분석할 사진이 없어요.'; render(); return; }
+    draft.aiLoading = true; draft.aiError = null; render();
+    try {
+      var raw = await sample.json(AI_PROMPT, { images: blob, modelTier: 'default' });
+      draft.aiResult = normalizeAiResult(raw);
+      if (!draft.aiResult) draft.aiError = '분석 결과를 이해하지 못했어요.';
+    } catch (err) {
+      if (err && err.code === 'not_granted') {
+        // 뷰 전체에서 다시 묻지 않는 게 원칙이라, 패널 자체를 앞으로 숨긴다
+        state.sampleImagesAvailable = false;
+      } else {
+        draft.aiError = friendlySampleError(err);
+      }
+    } finally {
+      draft.aiLoading = false; render();
+    }
+  }
+
+  function applyAiName() {
+    var draft = state.formDraft;
+    if (!draft.aiResult || !draft.aiResult.name) return;
+    draft.name = draft.aiResult.name;
+    render();
+  }
+
+  function applyAiInfo() {
+    var draft = state.formDraft;
+    var r = draft.aiResult;
+    if (!r) return;
+    var lines = [];
+    if (r.type) lines.push('종류: ' + r.type);
+    if (r.origin) lines.push('원산지: ' + r.origin);
+    if (r.priceRange) lines.push('가격대: ' + r.priceRange);
+    if (r.history) lines.push(r.history);
+    if (r.note) lines.push('(' + r.note + ')');
+    var block = lines.join('\n');
+    if (block) {
+      draft.memo = draft.memo ? (draft.memo + '\n\n[AI 분석]\n' + block) : ('[AI 분석]\n' + block);
+    }
+    draft.aiApplied = true;
+    render();
+  }
+
+  function formViewHtml() {
+    var draft = state.formDraft;
+    var cfg = CATEGORIES[draft.category];
+    var allRated = cfg.criteria.every(function (c) { return draft.ratings[c.key] >= 1; });
+    var overall = allRated ? (cfg.criteria.reduce(function (s, c) { return s + draft.ratings[c.key]; }, 0) / cfg.criteria.length) : null;
+    var canSubmit = draft.name.trim().length > 0 && allRated && !state.submitting && !draft.compressing;
+
+    var photoInner;
+    if (draft.compressing) photoInner = '<div class="photo-loading">사진 처리 중...</div>';
+    else if (draft.photo) photoInner = '<img src="' + draft.photo + '" alt="미리보기">' + '<button type="button" class="photo-remove" data-action="remove-photo" aria-label="사진 삭제">' + ICONS.trash + '</button>';
+    else photoInner = '<div class="photo-placeholder">' + ICONS.image + '<span>사진 추가</span></div>';
+
+    var catChips = Object.keys(CATEGORIES).map(function (key) {
+      var c = CATEGORIES[key];
+      return '<button type="button" class="chip ' + (draft.category === key ? 'active' : '') + '" data-action="pick-category" data-category="' + key + '">' + c.icon + escapeHtml(c.label) + '</button>';
+    }).join('');
+
+    var ratingRows = cfg.criteria.map(function (c) { return ratingRow(c, draft.ratings[c.key] || 0); }).join('');
+
+    return '<form id="drink-form" class="drink-form">' +
+      '<div class="photo-picker" data-action="trigger-library-input">' + photoInner + '</div>' +
+      '<div class="photo-actions">' +
+      '<button type="button" class="btn btn-ghost" data-action="trigger-library-input">' + ICONS.image + ' 앨범에서 선택</button>' +
+      '<button type="button" class="btn btn-ghost" data-action="trigger-camera-input">' + ICONS.camera + ' 촬영</button>' +
+      '</div>' +
+      '<input type="file" id="library-file-input" accept="image/*" hidden>' +
+      '<input type="file" id="camera-file-input" accept="image/*" capture="environment" hidden>' +
+      aiPanelHtml(draft) +
+      '<label class="field"><span class="field-label">술 이름</span>' +
+      '<input type="text" data-field="name" value="' + escapeHtml(draft.name) + '" placeholder="예: 곰표 밀맥주" maxlength="80"></label>' +
+      '<div class="field"><span class="field-label">종류</span><div class="category-rail">' + catChips + '</div></div>' +
+      '<div class="field"><span class="field-label">평가 항목</span><div class="rating-panel">' + ratingRows + '</div>' +
+      '<div class="overall-preview"><span>총 평점</span><strong>' + (overall !== null ? overall.toFixed(1) : '—') + '</strong><span class="of5">/ 5</span></div></div>' +
+      '<label class="field"><span class="field-label">시음 메모 <em>(선택)</em></span>' +
+      '<textarea data-field="memo" placeholder="맛, 향, 함께한 안주 등을 자유롭게" maxlength="500" rows="3">' + escapeHtml(draft.memo) + '</textarea></label>' +
+      (state.formError ? '<p class="form-error">' + escapeHtml(state.formError) + '</p>' : '') +
+      '<div class="form-actions"><button type="button" class="btn btn-ghost" data-action="cancel-form">취소</button>' +
+      '<button type="submit" class="btn btn-primary" ' + (canSubmit ? '' : 'disabled') + '>' + (state.submitting ? '저장 중...' : (state.editingId ? '수정하기' : '기록하기')) + '</button></div>' +
+      '</form>';
+  }
+
+  function setupViewHtml() {
+    return '<div class="setup-screen">' +
+      '<h2>닉네임을 정해주세요</h2>' +
+      '<p class="setup-desc">이 링크를 여러 명이 같이 쓸 때, 각자 자기 기록만 보이게 구분하는 데 써요. 언제든 나중에 바꿀 수 있어요.</p>' +
+      '<input type="text" data-field="setupName" value="' + escapeHtml(state.setupDraftName) + '" placeholder="예: 혜성" maxlength="20">' +
+      (state.setupError ? '<p class="form-error">' + escapeHtml(state.setupError) + '</p>' : '') +
+      '<div class="form-actions">' +
+      (state.setupIsInitial ? '' : '<button type="button" class="btn btn-ghost" data-action="cancel-setup">취소</button>') +
+      '<button type="button" class="btn btn-primary" data-action="confirm-setup">' + (state.setupIsInitial ? '시작하기' : '저장') + '</button>' +
+      '</div></div>';
+  }
+
+  function confirmSetup() {
+    var name = (state.setupDraftName || '').trim();
+    if (!name) { state.setupError = '닉네임을 입력해주세요.'; render(); return; }
+    state.myName = name;
+    try { localStorage.setItem(STORAGE_KEY, name); } catch (e) {}
+    state.setupError = null;
+    setView('list');
+  }
+
+  function openChangeName() {
+    state.setupDraftName = state.myName;
+    state.setupIsInitial = false;
+    state.setupError = null;
+    setView('setup');
+  }
+
+  function detailViewHtml() {
+    var d = state.drinks.filter(function (x) { return x.id === state.selectedId; })[0];
+    if (!d) return '<div class="empty-state"><p>기록을 찾을 수 없어요.</p></div>';
+    var cfg = CATEGORIES[d.category];
+    var date = new Date(d.createdAt).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
+    var criteriaRows = cfg.criteria.map(function (c) {
+      var v = d.ratings[c.key] || 0;
+      return '<div class="criteria-row"><span>' + escapeHtml(c.label) + '</span><div class="criteria-value">' + scoreGauge(v, 'sm') + '<span class="score-num">' + v + '</span></div></div>';
+    }).join('');
+    var deleteBtn = state.deleteConfirmId === d.id
+      ? '<button type="button" class="btn btn-danger" data-action="confirm-delete" data-id="' + d.id + '">정말 삭제할까요?</button>'
+      : '<button type="button" class="btn btn-danger-outline" data-action="ask-delete" data-id="' + d.id + '">삭제</button>';
+    var isMine = !d.owner || d.owner === state.myName;
+    var ownerActions = isMine
+      ? ('<button type="button" class="btn btn-secondary" data-action="edit-drink" data-id="' + d.id + '">수정</button>' + deleteBtn)
+      : '';
+
+    return '<div class="drink-detail">' +
+      '<div class="detail-media">' +
+      (d.photo ? '<img src="' + d.photo + '" alt="' + escapeHtml(d.name) + '">' : '<span class="detail-icon">' + cfg.icon + '</span>') +
+      '<button type="button" class="favorite-chip large ' + (d.favorite ? 'active' : '') + '" data-action="toggle-favorite" data-id="' + d.id + '" data-current="' + (!!d.favorite) + '" aria-label="즐겨찾기">' + heartIcon(d.favorite) + '</button>' +
+      '</div>' +
+      '<div class="detail-body">' +
+      '<span class="detail-cat">' + cfg.icon + escapeHtml(cfg.label) + '</span>' +
+      (!isMine ? '<span class="detail-owner-badge">' + escapeHtml(d.owner) + '님의 기록</span>' : '') +
+      '<h2 class="detail-name">' + escapeHtml(d.name) + '</h2>' +
+      '<p class="detail-date">' + date + ' 기록</p>' +
+      '<div class="overall-block"><span class="overall-num">' + d.overallScore.toFixed(1) + '</span>' + scoreGauge(d.overallScore, 'lg') + '</div>' +
+      '<div class="criteria-panel">' + criteriaRows + '</div>' +
+      (d.memo ? '<div class="memo-block"><span class="field-label">시음 메모</span><p>' + escapeHtml(d.memo) + '</p></div>' : '') +
+      '<div class="form-actions">' +
+      '<button type="button" class="btn btn-ghost" data-action="back">목록으로</button>' +
+      ownerActions +
+      '</div></div></div>';
+  }
+
+  function render() {
+    var app = document.getElementById('app');
+    var mainHtml;
+    if (state.dbReady === null) mainHtml = '<div class="status-screen"><p>불러오는 중...</p></div>';
+    else if (state.dbReady === false) mainHtml = '<div class="status-screen"><p>저장 기능을 사용할 수 없어요.</p><p class="status-sub">페이지를 새로고침하거나, 전체 화면으로 열어 다시 시도해주세요.</p></div>';
+    else if (state.view === 'setup') mainHtml = setupViewHtml();
+    else if (state.view === 'list') mainHtml = listViewHtml();
+    else if (state.view === 'form' || state.view === 'editForm') mainHtml = formViewHtml();
+    else mainHtml = detailViewHtml();
+    app.innerHTML = headerHtml() + '<main class="app-main">' + mainHtml + '</main>';
+  }
+
+  function setView(v) {
+    state.deleteConfirmId = null;
+    state.view = v;
+    render();
+    window.scrollTo(0, 0);
+  }
+
+  function goBack() {
+    if (state.view === 'detail') setView('list');
+    else if (state.view === 'editForm') { state.selectedId = state.editingId; setView('detail'); }
+    else if (state.view === 'setup') setView('list');
+    else setView('list');
+  }
+
+  function freshFormDraft() {
+    return { photoFile: null, aiResult: null, aiLoading: false, aiError: null, aiApplied: false };
+  }
+
+  function openAddForm() {
+    state.editingId = null;
+    state.formDraft = Object.assign(
+      { name: '', category: Object.keys(CATEGORIES)[0], ratings: {}, memo: '', photo: null, thumb: null, favorite: false, compressing: false },
+      freshFormDraft()
+    );
+    state.formError = null;
+    setView('form');
+  }
+
+  function openEditForm(id) {
+    var d = state.drinks.filter(function (x) { return x.id === id; })[0];
+    if (!d) return;
+    state.editingId = id;
+    state.formDraft = Object.assign(
+      { name: d.name, category: d.category, ratings: Object.assign({}, d.ratings), memo: d.memo || '', photo: d.photo || null, thumb: d.thumb || null, favorite: !!d.favorite, compressing: false },
+      freshFormDraft()
+    );
+    state.formError = null;
+    setView('editForm');
+  }
+
+  function openDetail(id) { state.selectedId = id; setView('detail'); }
+
+  async function submitForm() {
+    var draft = state.formDraft;
+    if (!draft.name.trim()) { state.formError = '술 이름을 입력해주세요.'; render(); return; }
+    var cfg = CATEGORIES[draft.category];
+    for (var i = 0; i < cfg.criteria.length; i++) {
+      var c = cfg.criteria[i];
+      if (!draft.ratings[c.key]) { state.formError = c.label + ' 항목에 점수를 매겨주세요.'; render(); return; }
+    }
+    state.submitting = true; state.formError = null; render();
+    var overallScore = Math.round((cfg.criteria.reduce(function (s, c) { return s + draft.ratings[c.key]; }, 0) / cfg.criteria.length) * 10) / 10;
+    var payload = {
+      name: draft.name.trim(), category: draft.category, ratings: draft.ratings,
+      memo: draft.memo || '', photo: draft.photo || null, thumb: draft.thumb || null, overallScore: overallScore
+    };
+    try {
+      if (state.editingId) {
+        payload.favorite = draft.favorite;
+        // owner 필드는 보내지 않아 병합 업데이트에서 원래 작성자가 그대로 유지된다
+        await db.doc('drinks/' + state.editingId).update(payload);
+        state.selectedId = state.editingId;
+        setView('detail');
+      } else {
+        payload.favorite = false;
+        payload.owner = state.myName;
+        payload.createdAt = new Date().toISOString();
+        await db.collection('drinks').add(payload);
+        setView('list');
+      }
+    } catch (err) {
+      state.formError = friendlyDbError(err);
+    } finally {
+      state.submitting = false; render();
+    }
+  }
+
+  async function toggleFavorite(id, current) {
+    try {
+      await db.doc('drinks/' + id).update({ favorite: !current });
+      var d = state.drinks.filter(function (x) { return x.id === id; })[0];
+      if (d) d.favorite = !current;
+      render();
+    } catch (err) { alert(friendlyDbError(err)); }
+  }
+
+  async function deleteDrink(id) {
+    try {
+      await db.doc('drinks/' + id).delete();
+      state.drinks = state.drinks.filter(function (d) { return d.id !== id; });
+      setView('list');
+    } catch (err) { alert(friendlyDbError(err)); }
+  }
+
+  async function handlePhotoSelected(file) {
+    if (!file) return;
+    state.formDraft.photoFile = file;
+    state.formDraft.aiResult = null;
+    state.formDraft.aiError = null;
+    state.formDraft.aiApplied = false;
+    state.formDraft.compressing = true; render();
+    try {
+      var result = await preparePhoto(file);
+      state.formDraft.photo = result.photo;
+      state.formDraft.thumb = result.thumb;
+    } catch (err) {
+      state.formError = '사진을 처리하지 못했어요.';
+    } finally {
+      state.formDraft.compressing = false; render();
+    }
+    if (sampleReady) await sampleReady;
+    if (state.sampleImagesAvailable) analyzePhoto();
+  }
+
+  function onRootClick(e) {
+    var el = e.target.closest('[data-action]');
+    if (!el) return;
+    var action = el.dataset.action;
+    if (action === 'open-add-form') openAddForm();
+    else if (action === 'open-detail') openDetail(el.dataset.id);
+    else if (action === 'back') goBack();
+    else if (action === 'cancel-form') goBack();
+    else if (action === 'toggle-favorite') toggleFavorite(el.dataset.id, el.dataset.current === 'true');
+    else if (action === 'set-filter-category') { state.filterCategory = el.dataset.category; render(); }
+    else if (action === 'pick-category') { state.formDraft.category = el.dataset.category; state.formDraft.ratings = {}; render(); }
+    else if (action === 'set-rating') { state.formDraft.ratings[el.dataset.key] = Number(el.dataset.value); render(); }
+    else if (action === 'trigger-library-input') document.getElementById('library-file-input').click();
+    else if (action === 'trigger-camera-input') document.getElementById('camera-file-input').click();
+    else if (action === 'remove-photo') {
+      state.formDraft.photo = null; state.formDraft.thumb = null; state.formDraft.photoFile = null;
+      state.formDraft.aiResult = null; state.formDraft.aiError = null; state.formDraft.aiApplied = false;
+      render();
+    }
+    else if (action === 'analyze-photo') analyzePhoto();
+    else if (action === 'apply-ai-name') applyAiName();
+    else if (action === 'apply-ai-info') applyAiInfo();
+    else if (action === 'edit-drink') openEditForm(el.dataset.id);
+    else if (action === 'ask-delete') { state.deleteConfirmId = el.dataset.id; render(); }
+    else if (action === 'confirm-delete') deleteDrink(el.dataset.id);
+    else if (action === 'change-name') openChangeName();
+    else if (action === 'confirm-setup') confirmSetup();
+    else if (action === 'cancel-setup') setView('list');
+  }
+
+  function onRootKeydown(e) {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    var el = e.target.closest('[data-action]');
+    if (!el || el.tagName === 'BUTTON' || el.tagName === 'INPUT') return;
+    e.preventDefault(); el.click();
+  }
+
+  function onRootInput(e) {
+    var field = e.target.dataset.field;
+    if (!field) return;
+    if (field === 'setupName') { state.setupDraftName = e.target.value; return; }
+    if (!state.formDraft) return;
+    if (field === 'name') state.formDraft.name = e.target.value;
+    if (field === 'memo') state.formDraft.memo = e.target.value;
+  }
+
+  function onRootChange(e) {
+    if (e.target.id === 'library-file-input' || e.target.id === 'camera-file-input') handlePhotoSelected(e.target.files[0]);
+    if (e.target.id === 'favorites-toggle') { state.favoritesOnly = e.target.checked; render(); }
+    if (e.target.id === 'show-all-toggle') { state.showAllOwners = e.target.checked; render(); }
+  }
+
+  function onRootSubmit(e) {
+    if (e.target.id === 'drink-form') { e.preventDefault(); submitForm(); }
+  }
+
+  var appEl = document.getElementById('app');
+  appEl.addEventListener('click', onRootClick);
+  appEl.addEventListener('keydown', onRootKeydown);
+  appEl.addEventListener('input', onRootInput);
+  appEl.addEventListener('change', onRootChange);
+  appEl.addEventListener('submit', onRootSubmit);
+
+  sampleReady = (async function () {
+    try { sample = await window.claude.use('sample'); } catch (e) { sample = null; }
+    if (sample) {
+      try {
+        var limits = await sample.limits();
+        state.sampleImagesAvailable = !!(limits && limits.images);
+      } catch (e) { state.sampleImagesAvailable = false; }
+    }
+    if (state.view === 'form' || state.view === 'editForm') render();
+  })();
+
+  (async function init() {
+    var dbNs = null;
+    try { dbNs = await window.claude.use('db'); } catch (e) { dbNs = null; }
+    if (!dbNs) { state.dbReady = false; render(); return; }
+    db = dbNs;
+    state.dbReady = true;
+    var storedName = null;
+    try { storedName = localStorage.getItem(STORAGE_KEY); } catch (e) { storedName = null; }
+    if (storedName && storedName.trim()) {
+      state.myName = storedName.trim();
+    } else {
+      state.setupIsInitial = true;
+      state.view = 'setup';
+    }
+    db.collection('drinks').orderBy('createdAt', 'desc').onSnapshot(
+      function (snap) {
+        state.drinks = snap.docs.map(function (doc) { return Object.assign({ id: doc.id }, doc.data()); });
+        if (state.view === 'list') render();
+      },
+      function (err) { console.error('db snapshot error', err); }
+    );
+    render();
+  })();
+})();
+</script>
