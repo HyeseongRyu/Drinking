@@ -651,3 +651,89 @@ button {
     grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
   }
 }
+
+/* AI 사진 분석 패널 */
+.ai-panel {
+  background: var(--surface);
+  border: 1px dashed var(--border);
+  border-radius: 14px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.ai-status {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.ai-status.ai-error { color: #c0322b; }
+.ai-label {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.ai-label em { font-style: normal; text-transform: none; letter-spacing: 0; margin-left: 6px; }
+.cand-block { display: flex; flex-direction: column; gap: 9px; }
+.cand-chips { display: flex; flex-direction: column; gap: 7px; }
+.cand-chip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  text-align: left;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text);
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+}
+.cand-chip.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+.cand-chip em {
+  flex-shrink: 0;
+  font-style: normal;
+  font-weight: 600;
+  font-size: 0.7rem;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text-muted);
+}
+.cand-chip.active em { background: rgba(255, 255, 255, 0.22); color: #fff; }
+.ai-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 8px 14px;
+  margin: 0;
+}
+.ai-fields > div { display: flex; flex-direction: column; gap: 2px; }
+.ai-fields dt {
+  margin: 0;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.ai-fields dd { margin: 0; font-size: 0.92rem; }
+.ai-history { margin: 0; font-size: 0.88rem; line-height: 1.5; }
+.ai-note { margin: 0; font-size: 0.78rem; color: var(--text-muted); }
+.btn.ghost.small {
+  flex: none;
+  align-self: flex-start;
+  padding: 8px 13px;
+  font-size: 0.85rem;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  border-radius: 10px;
+  cursor: pointer;
+}

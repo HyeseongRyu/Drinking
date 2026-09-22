@@ -3,13 +3,15 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "node --watch index.js",
-    "start": "node index.js"
+    "dev": "node --env-file-if-exists=../.env --watch index.js",
+    "start": "node --env-file-if-exists=../.env index.js"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.127.0",
     "better-sqlite3": "^11.3.0",
     "cors": "^2.8.5",
     "express": "^4.19.2",
-    "multer": "^2.0.0"
+    "multer": "^2.0.0",
+    "zod": "^4.6.5"
   }
 }

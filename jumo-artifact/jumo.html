@@ -1,5 +1,6 @@
 <title>주모</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/exif-js/2.3.0/exif.js"></script>
 <style>
   :root {
     --bg: #f2eef1;
@@ -305,6 +306,7 @@
     background: var(--surface); border: 1px dashed var(--line); border-radius: 14px;
     padding: 14px; display: flex; flex-direction: column; gap: 10px;
   }
+  .ai-panel:empty { display: none; }
   .ai-trigger { display: flex; align-items: center; justify-content: center; gap: 8px; }
   .ai-trigger svg { width: 16px; height: 16px; color: var(--gold); }
   .ai-status { margin: 0; color: var(--muted); font-size: 0.9rem; display: flex; align-items: center; gap: 7px; }
@@ -328,9 +330,35 @@
   .btn-sm { flex: none; padding: 9px 14px; font-size: 0.85rem; }
   .ai-applied { font-size: 0.85rem; color: var(--muted); }
 
+
+  .cand-block { display: flex; flex-direction: column; gap: 9px; padding-bottom: 11px; border-bottom: 1px solid var(--line); }
+  .cand-block .ai-name-label em { font-style: normal; text-transform: none; letter-spacing: 0; opacity: 0.85; margin-left: 6px; }
+  .cand-chips { display: flex; flex-direction: column; gap: 7px; }
+  .cand-chip {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    width: 100%; text-align: left; padding: 12px 14px; border-radius: 12px;
+    border: 1px solid var(--line); background: var(--surface-2); color: var(--ink);
+    font-family: 'Gowun Batang', serif; font-weight: 700; font-size: 1rem; line-height: 1.35;
+  }
+  .cand-chip.active { background: var(--wine-solid); border-color: var(--wine-solid); color: var(--on-solid); }
+  .cand-top {
+    flex-shrink: 0; font-family: 'IBM Plex Sans KR', sans-serif; font-weight: 600;
+    font-size: 0.7rem; padding: 3px 8px; border-radius: 999px;
+    background: var(--surface); color: var(--muted);
+  }
+  .cand-chip.active .cand-top { background: rgba(255, 255, 255, 0.22); color: var(--on-solid); }
+
   .field { display: flex; flex-direction: column; gap: 9px; }
-  .field-label { font-size: 0.84rem; font-weight: 600; color: var(--muted); }
+  .field-label { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 0.84rem; font-weight: 600; color: var(--muted); }
   .field-label em { font-style: normal; font-weight: 400; opacity: 0.8; }
+  .desc-loading {
+    display: inline-flex; align-items: center; gap: 5px;
+    color: var(--wine); font-weight: 600; font-size: 0.78rem;
+    background: var(--surface-2); padding: 3px 9px; border-radius: 999px;
+  }
+  .desc-loading svg { width: 12px; height: 12px; animation: spin 1.1s linear infinite; }
+  @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  .field textarea:disabled { opacity: 0.6; }
 
   .field input[type="text"], .field textarea {
     background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
@@ -401,6 +429,52 @@
     display: flex; flex-direction: column; gap: 7px;
   }
   .memo-block p { margin: 0; white-space: pre-wrap; line-height: 1.6; }
+
+  .photo-meta { display: flex; align-items: center; gap: 6px; font-size: 0.8rem; color: var(--muted); margin-top: -6px; }
+  .photo-meta svg { width: 14px; height: 14px; color: var(--wine); flex-shrink: 0; }
+
+  /* tabs */
+  .main-tabs { display: flex; gap: 6px; background: var(--surface-2); padding: 4px; border-radius: 13px; margin-bottom: 16px; }
+  .tab-btn { flex: 1; padding: 10px; border-radius: 10px; font-size: 0.9rem; font-weight: 600; color: var(--muted); }
+  .tab-btn.active { background: var(--surface); color: var(--ink); box-shadow: var(--shadow); }
+
+  /* map */
+  .map-plot {
+    position: relative; aspect-ratio: 4 / 3; border-radius: 16px; overflow: hidden; margin-bottom: 16px;
+    background-color: var(--surface);
+    background-image: linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size: 12.5% 12.5%;
+    border: 1px solid var(--line);
+  }
+  .map-pin {
+    position: absolute; transform: translate(-50%, -50%);
+    width: 38px; height: 38px; border-radius: 50%;
+    background: var(--wine-solid); color: var(--on-solid);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: var(--shadow); border: 3px solid var(--surface);
+  }
+  .map-pin svg { width: 17px; height: 17px; }
+  .map-list { display: flex; flex-direction: column; gap: 10px; }
+  .map-row { display: flex; align-items: center; gap: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; text-align: left; width: 100%; }
+  .map-row-icon svg { width: 22px; height: 22px; color: var(--muted); }
+  .map-row-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+  .map-row-body strong { font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .map-row-body span { font-size: 0.78rem; color: var(--muted); }
+  .map-row-link {
+    flex-shrink: 0; font-size: 0.8rem; font-weight: 600; color: var(--wine);
+    padding: 7px 11px; border: 1px solid var(--wine); border-radius: 9px;
+  }
+
+  .location-block {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .location-block p { margin: 0; font-size: 0.92rem; color: var(--ink); }
+  .location-link {
+    align-self: flex-start; font-size: 0.85rem; font-weight: 600; color: var(--on-solid);
+    background: var(--wine-solid); padding: 9px 16px; border-radius: 10px; display: inline-flex; align-items: center; gap: 6px;
+  }
+  .location-link svg { width: 15px; height: 15px; }
 </style>
 
 <div id="app">
@@ -422,7 +496,8 @@
     camera: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l1.5-2h7L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1Z"/><circle cx="12" cy="13.5" r="3.4"/></svg>',
     trash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h14M9 7V4.8A1 1 0 0 1 10 4h4a1 1 0 0 1 1 .8V7m1 0-.7 12.2a1.6 1.6 0 0 1-1.6 1.4H10.3a1.6 1.6 0 0 1-1.6-1.4L8 7"/></svg>',
     image: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="14" rx="2.2"/><circle cx="9" cy="10" r="1.6"/><path d="m5 17 4.5-4.5a2 2 0 0 1 2.8 0L17 17"/></svg>',
-    sparkle: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c.4 3.2 1 4.8 2.2 6C15.4 9.2 17 9.8 20 10c-3.2.4-4.8 1-6 2.2C12.8 13.4 12.2 15 12 18c-.4-3.2-1-4.8-2.2-6C8.6 10.8 7 10.2 4 10c3.2-.4 4.8-1 6-2.2C11.2 6.6 11.8 5 12 2Z"/></svg>'
+    sparkle: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c.4 3.2 1 4.8 2.2 6C15.4 9.2 17 9.8 20 10c-3.2.4-4.8 1-6 2.2C12.8 13.4 12.2 15 12 18c-.4-3.2-1-4.8-2.2-6C8.6 10.8 7 10.2 4 10c3.2-.4 4.8-1 6-2.2C11.2 6.6 11.8 5 12 2Z"/></svg>',
+    pin: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-6-5.7-6-10.5A6 6 0 0 1 18 10.5C18 15.3 12 21 12 21Z"/><circle cx="12" cy="10.5" r="2.2"/></svg>'
   };
   function heartIcon(filled) {
     return filled
@@ -496,12 +571,16 @@
   var db = null;
   var sample = null;
   var sampleReady = null;
+  var nameAnalysisTimer = null;
   var STORAGE_KEY = 'tastingNotes.ownerName';
   var state = {
     dbReady: null,
+    sampleTextAvailable: false,
     sampleImagesAvailable: false,
+    sampleChecked: false,
     drinks: [],
     view: 'list',
+    mainTab: 'list',
     filterCategory: 'all',
     favoritesOnly: false,
     showAllOwners: false,
@@ -517,8 +596,15 @@
     formDraft: null
   };
 
-  var AI_PROMPT = '사진 속 술의 라벨이나 병을 보고 아래 JSON 형식으로만 답해주세요. 라벨 문구를 최대한 읽고 활용하세요. 확실하지 않은 값은 null로 두고, 짐작한 내용은 note에 "추정"이라고 밝혀주세요. 다른 설명 없이 JSON만 출력하세요.\n\n' +
-    '{"name": "제품명 (브랜드명 포함, 모르면 null)", "type": "종류/스타일 (예: 싱글몰트 위스키, 블렌디드 위스키, 필스너 맥주, IPA, 스파클링 와인 등, 모르면 null)", "origin": "생산 국가나 지역 (모르면 null)", "priceRange": "한국 소매 기준 대략적인 가격대, 예: \"7만~9만원대\" (모르면 null)", "history": "브랜드나 술에 대한 간단한 역사/배경 1~2문장 (모르면 null)", "note": "라벨이 잘 안 보이거나 추정한 부분에 대한 설명 (없으면 null)"}';
+
+  var ANALYSIS_SCHEMA = '{"candidates": ["가능성 높은 제품명 후보를 유력한 순서로 1~4개. 확신이 전혀 없으면 빈 배열 []"], "type": "종류/스타일 (예: 싱글몰트 위스키, 필스너 맥주, IPA, 스파클링 와인, 생막걸리 등, 모르면 null)", "abv": "도수(%), 예: \"40%\" (모르면 null)", "origin": "생산 국가나 지역 (모르면 null)", "priceRange": "한국 소매 기준 대략적인 가격대, 예: \"7만~9만원대\" (모르면 null)", "history": "브랜드나 술에 대한 간단한 역사/배경 1~2문장 (모르면 null)", "note": "추정했거나 확실하지 않은 부분에 대한 설명 (없으면 null)"}';
+
+  var ANALYSIS_RULES = '아래 정보를 보고 어떤 술인지 추정해서 JSON 형식으로만 답해주세요.\n' +
+    '- candidates: 제품명 후보를 유력한 순서로 최대 4개까지. 짐작조차 어려우면 빈 배열로 두세요.\n' +
+    '- 나머지 필드는 candidates의 첫 번째 후보를 기준으로 작성하세요.\n' +
+    '- 확실하지 않은 값은 null로 두고, 짐작한 내용은 note에 "추정"이라고 밝혀주세요.\n' +
+    '- 술이 아닌 것 같으면 모든 값을 null(candidates는 [])로 두세요.\n' +
+    '- 다른 설명 없이 JSON만 출력하세요.\n\n' + ANALYSIS_SCHEMA + '\n\n';
 
   function escapeHtml(str) {
     return String(str == null ? '' : str).replace(/[&<>"']/g, function (m) {
@@ -545,6 +631,47 @@
       img.onerror = function (e) { URL.revokeObjectURL(url); reject(e); };
       img.src = url;
     });
+  }
+
+  function extractExif(file) {
+    // EXIF.getData의 콜백이 특정 사진(HEIC 등)에서 아예 호출되지 않는 경우가 있어,
+    // 타임아웃으로 상한을 둬서 뒤따르는 AI 분석 자동 실행이 무한정 막히지 않게 한다.
+    var settled = false;
+    var timed = new Promise(function (resolve) {
+      setTimeout(function () { if (!settled) resolve({}); }, 3000);
+    });
+    var real = new Promise(function (resolve) {
+      function done(v) { settled = true; resolve(v); }
+      if (typeof EXIF === 'undefined') { done({}); return; }
+      try {
+        EXIF.getData(file, function () {
+          try {
+            var lat = EXIF.getTag(this, 'GPSLatitude');
+            var latRef = EXIF.getTag(this, 'GPSLatitudeRef');
+            var lon = EXIF.getTag(this, 'GPSLongitude');
+            var lonRef = EXIF.getTag(this, 'GPSLongitudeRef');
+            var dateStr = EXIF.getTag(this, 'DateTimeOriginal') || EXIF.getTag(this, 'DateTime');
+            var location = null;
+            if (lat && lon && lat.length === 3 && lon.length === 3) {
+              var latDec = Number(lat[0]) + Number(lat[1]) / 60 + Number(lat[2]) / 3600;
+              var lonDec = Number(lon[0]) + Number(lon[1]) / 60 + Number(lon[2]) / 3600;
+              if (latRef === 'S') latDec = -latDec;
+              if (lonRef === 'W') lonDec = -lonDec;
+              if (isFinite(latDec) && isFinite(lonDec)) {
+                location = { lat: Math.round(latDec * 1e6) / 1e6, lon: Math.round(lonDec * 1e6) / 1e6 };
+              }
+            }
+            var takenAt = null;
+            if (dateStr) {
+              var m = /^(\d{4}):(\d{2}):(\d{2}) (\d{2}):(\d{2}):(\d{2})/.exec(dateStr);
+              if (m) takenAt = m[1] + '-' + m[2] + '-' + m[3] + 'T' + m[4] + ':' + m[5] + ':' + m[6];
+            }
+            done({ location: location, takenAt: takenAt });
+          } catch (e) { done({}); }
+        });
+      } catch (e) { done({}); }
+    });
+    return Promise.race([real, timed]);
   }
 
   function drawResized(img, maxDim, quality) {
@@ -639,70 +766,231 @@
     return '<div class="empty-state"><p>조건에 맞는 기록이 없어요.</p></div>';
   }
 
-  function listViewHtml() {
+  function mainTabsHtml() {
+    return '<div class="main-tabs">' +
+      '<button type="button" class="tab-btn ' + (state.mainTab === 'list' ? 'active' : '') + '" data-action="switch-tab" data-tab="list">목록</button>' +
+      '<button type="button" class="tab-btn ' + (state.mainTab === 'map' ? 'active' : '') + '" data-action="switch-tab" data-tab="map">지도</button>' +
+      '</div>';
+  }
+
+  function ownedDrinks() {
     // owner가 없는 기록(이 기능이 생기기 전에 만든 것)은 누구 것인지 알 수 없으니 숨기지 않는다
-    var mine = state.showAllOwners ? state.drinks : state.drinks.filter(function (d) { return !d.owner || d.owner === state.myName; });
+    return state.showAllOwners ? state.drinks : state.drinks.filter(function (d) { return !d.owner || d.owner === state.myName; });
+  }
+
+  function formatCoord(loc) {
+    var lat = Math.abs(loc.lat).toFixed(4) + '°' + (loc.lat >= 0 ? 'N' : 'S');
+    var lon = Math.abs(loc.lon).toFixed(4) + '°' + (loc.lon >= 0 ? 'E' : 'W');
+    return lat + ', ' + lon;
+  }
+
+  function mapsUrl(loc) {
+    return 'https://www.google.com/maps?q=' + loc.lat + ',' + loc.lon;
+  }
+
+  function formatTakenAt(iso) {
+    try {
+      return new Date(iso).toLocaleString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+    } catch (e) { return ''; }
+  }
+
+  function formatTakenAtShort(iso) {
+    try {
+      return new Date(iso).toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+    } catch (e) { return ''; }
+  }
+
+  function mapViewHtml() {
+    var withLoc = ownedDrinks().filter(function (d) { return d.location && typeof d.location.lat === 'number' && typeof d.location.lon === 'number'; });
+    if (withLoc.length === 0) {
+      return '<div class="empty-state"><div class="empty-mark">' + ICONS.pin + '</div><p>위치 정보가 있는 기록이 없어요.</p><p>사진에 위치 정보가 있으면 자동으로 표시돼요.</p></div>';
+    }
+    var lats = withLoc.map(function (d) { return d.location.lat; });
+    var lons = withLoc.map(function (d) { return d.location.lon; });
+    var minLat = Math.min.apply(null, lats), maxLat = Math.max.apply(null, lats);
+    var minLon = Math.min.apply(null, lons), maxLon = Math.max.apply(null, lons);
+    var latSpan = (maxLat - minLat) || 0.001;
+    var lonSpan = (maxLon - minLon) || 0.001;
+    var pad = 14;
+    var pins = withLoc.map(function (d) {
+      var xPct = pad + ((d.location.lon - minLon) / lonSpan) * (100 - 2 * pad);
+      var yPct = pad + (1 - (d.location.lat - minLat) / latSpan) * (100 - 2 * pad);
+      var cfg = CATEGORIES[d.category];
+      return '<button type="button" class="map-pin" style="left:' + xPct.toFixed(2) + '%; top:' + yPct.toFixed(2) + '%;" data-action="open-detail" data-id="' + d.id + '" aria-label="' + escapeHtml(d.name) + '">' + cfg.icon + '</button>';
+    }).join('');
+    var rows = withLoc.slice().sort(function (a, b) {
+      return (b.takenAt || b.createdAt).localeCompare(a.takenAt || a.createdAt);
+    }).map(function (d) {
+      var cfg = CATEGORIES[d.category];
+      return '<div class="map-row" data-action="open-detail" data-id="' + d.id + '" role="button" tabindex="0">' +
+        '<span class="map-row-icon">' + cfg.icon + '</span>' +
+        '<div class="map-row-body"><strong>' + escapeHtml(d.name) + '</strong>' +
+        '<span>' + formatCoord(d.location) + (d.takenAt ? ' · ' + formatTakenAtShort(d.takenAt) : '') + '</span></div>' +
+        '<a class="map-row-link" href="' + mapsUrl(d.location) + '" target="_blank" rel="noopener" onclick="event.stopPropagation()">구글맵</a>' +
+        '</div>';
+    }).join('');
+    return '<div class="map-plot">' + pins + '</div><div class="map-list">' + rows + '</div>';
+  }
+
+  function listViewHtml() {
+    var mine = ownedDrinks();
     var drinks = mine;
     if (state.filterCategory !== 'all') drinks = drinks.filter(function (d) { return d.category === state.filterCategory; });
     if (state.favoritesOnly) drinks = drinks.filter(function (d) { return d.favorite; });
     var body = drinks.length === 0 ? emptyStateHtml(mine.length === 0) : '<div class="drink-grid">' + drinks.map(drinkCardHtml).join('') + '</div>';
-    return filterBarHtml() + body + '<button type="button" class="fab" data-action="open-add-form" aria-label="새 기록">' + ICONS.plus + '</button>';
+    return mainTabsHtml() +
+      (state.mainTab === 'map' ? mapViewHtml() : (filterBarHtml() + body)) +
+      '<button type="button" class="fab" data-action="open-add-form" aria-label="새 기록">' + ICONS.plus + '</button>';
   }
 
-  function aiPanelHtml(draft) {
-    if (!state.sampleImagesAvailable || !draft.photo) return '';
-    var inner;
+  function photoAnalysisReady(draft) {
+    return state.sampleImagesAvailable && !!draft.photo;
+  }
+
+  function retryAction(draft) {
+    return photoAnalysisReady(draft) ? 'analyze-photo' : 'analyze-name';
+  }
+
+  function aiPanelInner(draft) {
+    if (!state.sampleChecked) {
+      return '<p class="ai-status">' + ICONS.sparkle + ' AI 기능 확인 중...</p>';
+    }
+    if (!state.sampleTextAvailable) {
+      if (!draft.photo) return '';
+      return '<p class="ai-status">이 화면에서는 AI 자동 채우기를 쓸 수 없어요.</p>' +
+        '<p class="ai-status" style="font-size:0.78rem;">이름 · 설명은 직접 입력해주세요.</p>';
+    }
     if (draft.aiLoading) {
-      inner = '<p class="ai-status">' + ICONS.sparkle + ' 사진으로 이름과 정보를 찾고 있어요...</p>';
-    } else if (draft.aiError) {
-      inner = '<p class="ai-status ai-error">' + escapeHtml(draft.aiError) + '</p>' +
-        '<button type="button" class="btn btn-ghost btn-sm" data-action="analyze-photo">다시 시도</button>';
-    } else if (draft.aiResult) {
+      var what = draft.aiSource === 'photo'
+        ? '사진으로 이름과 정보를 찾고 있어요...'
+        : '‘' + escapeHtml((draft.name || '').trim()) + '’ 정보를 찾고 있어요...';
+      return '<p class="ai-status">' + ICONS.sparkle + ' ' + what + '</p>';
+    }
+    if (draft.aiError) {
+      return '<p class="ai-status ai-error">' + escapeHtml(draft.aiError) + '</p>' +
+        '<button type="button" class="btn btn-ghost btn-sm" data-action="' + retryAction(draft) + '">다시 시도</button>';
+    }
+    if (draft.aiResult) {
       var r = draft.aiResult;
       var fields = '';
       if (r.type) fields += '<div><dt>종류</dt><dd>' + escapeHtml(r.type) + '</dd></div>';
+      if (r.abv) fields += '<div><dt>도수</dt><dd>' + escapeHtml(r.abv) + '</dd></div>';
       if (r.origin) fields += '<div><dt>원산지</dt><dd>' + escapeHtml(r.origin) + '</dd></div>';
       if (r.priceRange) fields += '<div><dt>가격대</dt><dd>' + escapeHtml(r.priceRange) + '</dd></div>';
-      var hasMemoInfo = !!(r.type || r.origin || r.priceRange || r.history || r.note);
-      var nameRow = r.name
-        ? ('<div class="ai-name-suggestion">' +
-            '<span class="ai-name-label">이름 제안</span>' +
-            '<span class="ai-name-value">' + escapeHtml(r.name) + '</span>' +
-            (draft.name.trim() === r.name
-              ? '<span class="ai-applied">적용됨</span>'
-              : '<button type="button" class="btn btn-secondary btn-sm" data-action="apply-ai-name">이름에 적용</button>') +
-          '</div>')
-        : '<p class="ai-status">이름은 알아보지 못했어요. 직접 입력해주세요.</p>';
-      inner = '<div class="ai-result">' +
+      var cands = draft.candidates || [];
+      var current = (draft.name || '').trim();
+      var nameRow = '';
+      if (cands.length) {
+        nameRow = '<div class="cand-block">' +
+          '<span class="ai-name-label">이름 후보 <em>맞는 걸 눌러주세요</em></span>' +
+          '<div class="cand-chips">' +
+          cands.map(function (c, i) {
+            return '<button type="button" class="cand-chip ' + (current === c ? 'active' : '') + '" data-action="apply-candidate" data-name="' + escapeHtml(c) + '">' +
+              escapeHtml(c) + (i === 0 && current !== c ? '<span class="cand-top">유력</span>' : '') +
+              (current === c ? '<span class="cand-top">선택됨</span>' : '') +
+              '</button>';
+          }).join('') +
+          '</div>' +
+          '<p class="ai-note">맞는 게 없으면 아래 ‘술 이름’에 직접 적어주세요.</p>' +
+          '</div>';
+      } else {
+        nameRow = '<p class="ai-status">이름 후보를 찾지 못했어요. 아래 ‘술 이름’에 직접 적어주세요.</p>';
+      }
+      var gotAnything = fields || r.history;
+      return '<div class="ai-result">' +
         nameRow +
         (fields ? '<dl class="ai-fields">' + fields + '</dl>' : '') +
         (r.history ? '<p class="ai-history">' + escapeHtml(r.history) + '</p>' : '') +
         (r.note ? '<p class="ai-note">' + escapeHtml(r.note) + '</p>' : '') +
-        '<p class="ai-disclaimer">AI가 사진으로 추정한 정보라 실제와 다를 수 있어요.</p>' +
+        (gotAnything
+          ? '<p class="ai-disclaimer">AI가 추정한 정보라 실제와 다를 수 있어요. 아래 설명 란에 자동으로 채워드렸어요.</p>'
+          : '<p class="ai-status">이 이름으로는 아는 정보가 없어요. 설명은 직접 적어주세요.</p>') +
         '<div class="ai-actions">' +
-        (hasMemoInfo
-          ? (draft.aiApplied
-            ? '<span class="ai-applied">메모에 추가됨</span>'
-            : '<button type="button" class="btn btn-secondary btn-sm" data-action="apply-ai-info">메모에 채우기</button>')
-          : '') +
-        '<button type="button" class="btn btn-ghost btn-sm" data-action="analyze-photo">다시 분석</button>' +
+        '<button type="button" class="btn btn-ghost btn-sm" data-action="' + retryAction(draft) + '">다시 찾기</button>' +
         '</div></div>';
-    } else {
-      inner = '<button type="button" class="btn btn-ghost btn-sm ai-trigger" data-action="analyze-photo">' + ICONS.sparkle + ' 사진으로 이름 · 정보 추천받기</button>';
     }
-    return '<div class="ai-panel">' + inner + '</div>';
+    if (photoAnalysisReady(draft)) {
+      return '<button type="button" class="btn btn-ghost btn-sm ai-trigger" data-action="analyze-photo">' + ICONS.sparkle + ' 사진으로 이름 · 정보 추천받기</button>';
+    }
+    if ((draft.name || '').trim().length >= 2) {
+      return '<button type="button" class="btn btn-ghost btn-sm ai-trigger" data-action="analyze-name">' + ICONS.sparkle + ' 이 이름으로 정보 찾기</button>';
+    }
+    return '<p class="ai-status">' + ICONS.sparkle + ' 술 이름을 적으면 이름 후보와 정보를 찾아드려요.</p>';
+  }
+
+  function aiPanelHtml(draft) {
+    return '<div class="ai-panel" id="ai-panel">' + aiPanelInner(draft) + '</div>';
+  }
+
+  function categoryChipsHtml(draft) {
+    return Object.keys(CATEGORIES).map(function (key) {
+      var c = CATEGORIES[key];
+      return '<button type="button" class="chip ' + (draft.category === key ? 'active' : '') + '" data-action="pick-category" data-category="' + key + '">' + c.icon + escapeHtml(c.label) + '</button>';
+    }).join('');
+  }
+
+  // 이름을 타이핑하는 중에 전체 render()를 돌리면 입력 포커스와 커서가 날아가므로,
+  // AI 관련 조각만 제자리에서 갈아끼운다.
+  function syncAiUi() {
+    var draft = state.formDraft;
+    if (!draft) return;
+    var panel = document.getElementById('ai-panel');
+    if (panel) panel.innerHTML = aiPanelInner(draft);
+    var badge = document.getElementById('desc-loading-slot');
+    if (badge) {
+      badge.innerHTML = draft.aiLoading
+        ? '<span class="desc-loading">' + ICONS.sparkle + ' 분석 중...</span>'
+        : '';
+    }
+    var ta = document.querySelector('textarea[data-field="description"]');
+    if (ta && document.activeElement !== ta && ta.value !== draft.description) {
+      ta.value = draft.description;
+    }
+  }
+
+  // 분석 결과가 들어오면 종류 칩과 평가 항목까지 바뀔 수 있어 전체를 다시 그려야 한다.
+  // 그 사이 사용자가 이름을 치고 있었다면 커서 위치까지 돌려놓는다.
+  function renderPreservingFocus() {
+    var el = document.activeElement;
+    var field = el && el.dataset ? el.dataset.field : null;
+    var start = null, end = null;
+    if (field) { try { start = el.selectionStart; end = el.selectionEnd; } catch (e) {} }
+    render();
+    if (!field) return;
+    var next = document.querySelector('[data-field="' + field + '"]');
+    if (!next) return;
+    next.focus();
+    if (start !== null) { try { next.setSelectionRange(start, end); } catch (e) {} }
   }
 
   function normalizeAiResult(r) {
     if (!r || typeof r !== 'object') return null;
+    var list = Array.isArray(r.candidates) ? r.candidates : (r.name ? [r.name] : []);
+    var candidates = [];
+    list.forEach(function (c) {
+      var name = typeof c === 'string' ? c.trim() : '';
+      if (name && candidates.indexOf(name) === -1 && candidates.length < 4) candidates.push(name);
+    });
     return {
-      name: r.name || null,
+      candidates: candidates,
       type: r.type || null,
+      abv: r.abv || null,
       origin: r.origin || null,
       priceRange: r.priceRange || null,
       history: r.history || null,
       note: r.note || null
     };
+  }
+
+  function composeDescription(r) {
+    var lines = [];
+    if (r.type) lines.push('종류: ' + r.type);
+    if (r.abv) lines.push('도수: ' + r.abv);
+    if (r.origin) lines.push('원산지: ' + r.origin);
+    if (r.priceRange) lines.push('가격대: ' + r.priceRange);
+    if (r.history) lines.push(r.history);
+    if (r.note) lines.push('(' + r.note + ')');
+    return lines.join('\n');
   }
 
   function friendlySampleError(err) {
@@ -729,51 +1017,118 @@
     return null;
   }
 
-  async function analyzePhoto() {
+  var TYPE_TO_CATEGORY = [
+    [/막걸리|탁주|동동주/, 'makgeolli'],
+    [/위스키|위스기|whisky|whiskey|버번|브랜디|꼬냑|코냑/i, 'whiskey'],
+    [/소주|증류식|고량주|보드카|진|럼|데킬라|테킬라/i, 'soju'],
+    [/와인|샴페인|스파클링|포트|셰리|wine/i, 'wine'],
+    [/맥주|라거|에일|ipa|스타우트|필스너|바이젠|beer/i, 'beer']
+  ];
+
+  function categoryFromType(type) {
+    if (!type) return null;
+    for (var i = 0; i < TYPE_TO_CATEGORY.length; i++) {
+      if (TYPE_TO_CATEGORY[i][0].test(type)) return TYPE_TO_CATEGORY[i][1];
+    }
+    return null;
+  }
+
+  function buildAnalysisPrompt(draft, opts) {
+    var cfg = CATEGORIES[draft.category];
+    var body = '';
+    if (opts.name) body += '술 이름(사용자 입력): ' + opts.name + '\n';
+    // 고른 적 없는 기본값을 알려주면 오히려 엉뚱한 쪽으로 추정한다.
+    if (draft.categoryPicked && cfg) body += '사용자가 고른 분류: ' + cfg.label;
+    return ANALYSIS_RULES + body;
+  }
+
+  // 사진 · 라벨 텍스트 · 이름, 세 가지 입력 모두 같은 결과 형태로 모은다.
+  async function runAnalysis(opts) {
     var draft = state.formDraft;
-    var blob = await getAnalysisBlob(draft);
-    if (!blob) { draft.aiError = '분석할 사진이 없어요.'; render(); return; }
-    draft.aiLoading = true; draft.aiError = null; render();
+    if (!draft || !sample) return;
+    draft.aiSource = opts.source;
+    draft.aiLoading = true;
+    draft.aiError = null;
+    if (opts.name) draft.lastAnalyzedName = opts.name;
+    syncAiUi();
     try {
-      var raw = await sample.json(AI_PROMPT, { images: blob, modelTier: 'default' });
-      draft.aiResult = normalizeAiResult(raw);
-      if (!draft.aiResult) draft.aiError = '분석 결과를 이해하지 못했어요.';
+      var callOpts = { modelTier: 'quick' };
+      if (opts.images) callOpts.images = opts.images;
+      var raw = await sample.json(buildAnalysisPrompt(draft, opts), callOpts);
+      applyAiResult(draft, normalizeAiResult(raw), opts);
     } catch (err) {
       if (err && err.code === 'not_granted') {
-        // 뷰 전체에서 다시 묻지 않는 게 원칙이라, 패널 자체를 앞으로 숨긴다
-        state.sampleImagesAvailable = false;
+        if (opts.images) state.sampleImagesAvailable = false;
+        else state.sampleTextAvailable = false;
       } else {
         draft.aiError = friendlySampleError(err);
       }
+      if (opts.name) draft.lastAnalyzedName = null;
     } finally {
-      draft.aiLoading = false; render();
+      draft.aiLoading = false;
+      renderPreservingFocus();
     }
   }
 
-  function applyAiName() {
+  async function analyzePhoto() {
     var draft = state.formDraft;
-    if (!draft.aiResult || !draft.aiResult.name) return;
-    draft.name = draft.aiResult.name;
-    render();
+    var blob = await getAnalysisBlob(draft);
+    if (!blob) { draft.aiError = '분석할 사진이 없어요.'; syncAiUi(); return; }
+    await runAnalysis({ source: 'photo', images: blob });
   }
 
-  function applyAiInfo() {
+  async function analyzeName(opts) {
     var draft = state.formDraft;
-    var r = draft.aiResult;
-    if (!r) return;
-    var lines = [];
-    if (r.type) lines.push('종류: ' + r.type);
-    if (r.origin) lines.push('원산지: ' + r.origin);
-    if (r.priceRange) lines.push('가격대: ' + r.priceRange);
-    if (r.history) lines.push(r.history);
-    if (r.note) lines.push('(' + r.note + ')');
-    var block = lines.join('\n');
-    if (block) {
-      draft.memo = draft.memo ? (draft.memo + '\n\n[AI 분석]\n' + block) : ('[AI 분석]\n' + block);
-    }
-    draft.aiApplied = true;
-    render();
+    var name = (draft.name || '').trim();
+    if (name.length < 2) { draft.aiError = '술 이름을 두 글자 이상 적어주세요.'; syncAiUi(); return; }
+    await runAnalysis({ source: 'name', name: name, keepCandidates: opts && opts.keepCandidates });
   }
+
+  function applyAiResult(draft, result, opts) {
+    draft.aiResult = result;
+    if (!result) { draft.aiError = '분석 결과를 이해하지 못했어요.'; return; }
+    if (!(opts && opts.keepCandidates)) draft.candidates = result.candidates;
+    draft.infoForName = (opts && opts.name) || result.candidates[0] || null;
+    // 사용자가 아직 종류를 고르지 않았으면 추정한 종류로 맞춰준다. 이미 매긴 점수는 건드리지 않는다.
+    if (!draft.categoryPicked && !Object.keys(draft.ratings).length) {
+      var cat = categoryFromType(result.type);
+      if (cat && cat !== draft.category) draft.category = cat;
+    }
+    var desc = composeDescription(result);
+    // 사용자가 직접 쓴 설명은 덮어쓰지 않는다.
+    if (desc && (!draft.description || draft.descriptionFromAi)) {
+      draft.description = desc;
+      draft.descriptionFromAi = true;
+    }
+  }
+
+  function applyCandidate(name) {
+    var draft = state.formDraft;
+    if (!draft || !name) return;
+    draft.name = name;
+    draft.lastAnalyzedName = name;
+    render();
+    // 후보를 바꿔 고르면 그 제품 기준으로 정보를 다시 받아온다. 후보 목록은 그대로 둔다.
+    if (name !== draft.infoForName) analyzeName({ keepCandidates: true });
+  }
+
+  function scheduleNameAnalysis() {
+    if (!state.formDraft) return;
+    clearTimeout(nameAnalysisTimer);
+    nameAnalysisTimer = setTimeout(async function () {
+      // capability 확인이 아직 안 끝났을 수 있으므로 여기서 기다린 뒤 판단한다.
+      if (sampleReady) await sampleReady;
+      var d = state.formDraft;
+      if (!d || d.aiLoading) return;
+      if (!state.sampleTextAvailable || !sample) { syncAiUi(); return; }
+      if (photoAnalysisReady(d)) { syncAiUi(); return; }
+      if (d.description && !d.descriptionFromAi) { syncAiUi(); return; }
+      var name = (d.name || '').trim();
+      if (name.length < 2 || name === d.lastAnalyzedName) { syncAiUi(); return; }
+      analyzeName();
+    }, 1400);
+  }
+
 
   function formViewHtml() {
     var draft = state.formDraft;
@@ -787,11 +1142,6 @@
     else if (draft.photo) photoInner = '<img src="' + draft.photo + '" alt="미리보기">' + '<button type="button" class="photo-remove" data-action="remove-photo" aria-label="사진 삭제">' + ICONS.trash + '</button>';
     else photoInner = '<div class="photo-placeholder">' + ICONS.image + '<span>사진 추가</span></div>';
 
-    var catChips = Object.keys(CATEGORIES).map(function (key) {
-      var c = CATEGORIES[key];
-      return '<button type="button" class="chip ' + (draft.category === key ? 'active' : '') + '" data-action="pick-category" data-category="' + key + '">' + c.icon + escapeHtml(c.label) + '</button>';
-    }).join('');
-
     var ratingRows = cfg.criteria.map(function (c) { return ratingRow(c, draft.ratings[c.key] || 0); }).join('');
 
     return '<form id="drink-form" class="drink-form">' +
@@ -802,10 +1152,17 @@
       '</div>' +
       '<input type="file" id="library-file-input" accept="image/*" hidden>' +
       '<input type="file" id="camera-file-input" accept="image/*" capture="environment" hidden>' +
-      aiPanelHtml(draft) +
+      (draft.location || draft.takenAt
+        ? '<p class="photo-meta">' + ICONS.pin + (draft.location ? '위치 · ' : '') + (draft.takenAt ? formatTakenAtShort(draft.takenAt) + ' 촬영' : '사진에서 위치 정보를 찾았어요') + '</p>'
+        : '') +
       '<label class="field"><span class="field-label">술 이름</span>' +
       '<input type="text" data-field="name" value="' + escapeHtml(draft.name) + '" placeholder="예: 곰표 밀맥주" maxlength="80"></label>' +
-      '<div class="field"><span class="field-label">종류</span><div class="category-rail">' + catChips + '</div></div>' +
+      '<div class="field"><span class="field-label">종류</span><div class="category-rail" id="category-rail">' + categoryChipsHtml(draft) + '</div></div>' +
+      aiPanelHtml(draft) +
+      '<label class="field"><span class="field-label">설명 <em>(사진이나 이름을 넣으면 AI가 자동으로 채워요)</em>' +
+      '<span id="desc-loading-slot">' + (draft.aiLoading ? '<span class="desc-loading">' + ICONS.sparkle + ' 분석 중...</span>' : '') + '</span>' +
+      '</span>' +
+      '<textarea data-field="description" placeholder="종류, 도수, 원산지, 역사 등이 여기 자동으로 채워져요" maxlength="600" rows="4">' + escapeHtml(draft.description) + '</textarea></label>' +
       '<div class="field"><span class="field-label">평가 항목</span><div class="rating-panel">' + ratingRows + '</div>' +
       '<div class="overall-preview"><span>총 평점</span><strong>' + (overall !== null ? overall.toFixed(1) : '—') + '</strong><span class="of5">/ 5</span></div></div>' +
       '<label class="field"><span class="field-label">시음 메모 <em>(선택)</em></span>' +
@@ -873,6 +1230,14 @@
       '<p class="detail-date">' + date + ' 기록</p>' +
       '<div class="overall-block"><span class="overall-num">' + d.overallScore.toFixed(1) + '</span>' + scoreGauge(d.overallScore, 'lg') + '</div>' +
       '<div class="criteria-panel">' + criteriaRows + '</div>' +
+      (d.description ? '<div class="memo-block"><span class="field-label">설명</span><p>' + escapeHtml(d.description) + '</p></div>' : '') +
+      (d.location ? (
+        '<div class="location-block">' +
+        '<span class="field-label">촬영 위치</span>' +
+        '<p>' + formatCoord(d.location) + (d.takenAt ? ' · ' + formatTakenAt(d.takenAt) : '') + '</p>' +
+        '<a class="location-link" href="' + mapsUrl(d.location) + '" target="_blank" rel="noopener">' + ICONS.pin + ' 구글맵에서 보기</a>' +
+        '</div>'
+      ) : '') +
       (d.memo ? '<div class="memo-block"><span class="field-label">시음 메모</span><p>' + escapeHtml(d.memo) + '</p></div>' : '') +
       '<div class="form-actions">' +
       '<button type="button" class="btn btn-ghost" data-action="back">목록으로</button>' +
@@ -907,13 +1272,17 @@
   }
 
   function freshFormDraft() {
-    return { photoFile: null, aiResult: null, aiLoading: false, aiError: null, aiApplied: false };
+    return {
+      photoFile: null, aiResult: null, aiLoading: false, aiError: null,
+      aiSource: null, descriptionFromAi: false, lastAnalyzedName: null,
+      candidates: [], infoForName: null, categoryPicked: false
+    };
   }
 
   function openAddForm() {
     state.editingId = null;
     state.formDraft = Object.assign(
-      { name: '', category: Object.keys(CATEGORIES)[0], ratings: {}, memo: '', photo: null, thumb: null, favorite: false, compressing: false },
+      { name: '', category: Object.keys(CATEGORIES)[0], ratings: {}, memo: '', description: '', photo: null, thumb: null, favorite: false, compressing: false, location: null, takenAt: null },
       freshFormDraft()
     );
     state.formError = null;
@@ -925,8 +1294,9 @@
     if (!d) return;
     state.editingId = id;
     state.formDraft = Object.assign(
-      { name: d.name, category: d.category, ratings: Object.assign({}, d.ratings), memo: d.memo || '', photo: d.photo || null, thumb: d.thumb || null, favorite: !!d.favorite, compressing: false },
-      freshFormDraft()
+      { name: d.name, category: d.category, ratings: Object.assign({}, d.ratings), memo: d.memo || '', description: d.description || '', photo: d.photo || null, thumb: d.thumb || null, favorite: !!d.favorite, compressing: false, location: d.location || null, takenAt: d.takenAt || null },
+      freshFormDraft(),
+      { categoryPicked: true }
     );
     state.formError = null;
     setView('editForm');
@@ -946,7 +1316,9 @@
     var overallScore = Math.round((cfg.criteria.reduce(function (s, c) { return s + draft.ratings[c.key]; }, 0) / cfg.criteria.length) * 10) / 10;
     var payload = {
       name: draft.name.trim(), category: draft.category, ratings: draft.ratings,
-      memo: draft.memo || '', photo: draft.photo || null, thumb: draft.thumb || null, overallScore: overallScore
+      memo: draft.memo || '', description: draft.description || '',
+      photo: draft.photo || null, thumb: draft.thumb || null, overallScore: overallScore,
+      location: draft.location || null, takenAt: draft.takenAt || null
     };
     try {
       if (state.editingId) {
@@ -991,7 +1363,8 @@
     state.formDraft.photoFile = file;
     state.formDraft.aiResult = null;
     state.formDraft.aiError = null;
-    state.formDraft.aiApplied = false;
+    state.formDraft.location = null;
+    state.formDraft.takenAt = null;
     state.formDraft.compressing = true; render();
     try {
       var result = await preparePhoto(file);
@@ -1002,8 +1375,16 @@
     } finally {
       state.formDraft.compressing = false; render();
     }
+    try {
+      var exif = await extractExif(file);
+      state.formDraft.location = exif.location || null;
+      state.formDraft.takenAt = exif.takenAt || null;
+      render();
+    } catch (e) { /* EXIF 정보 없이도 나머지 기능은 정상 동작해야 한다 */ }
     if (sampleReady) await sampleReady;
+    if (!sample) return;
     if (state.sampleImagesAvailable) analyzePhoto();
+    else syncAiUi();
   }
 
   function onRootClick(e) {
@@ -1016,24 +1397,27 @@
     else if (action === 'cancel-form') goBack();
     else if (action === 'toggle-favorite') toggleFavorite(el.dataset.id, el.dataset.current === 'true');
     else if (action === 'set-filter-category') { state.filterCategory = el.dataset.category; render(); }
-    else if (action === 'pick-category') { state.formDraft.category = el.dataset.category; state.formDraft.ratings = {}; render(); }
+    else if (action === 'pick-category') { state.formDraft.category = el.dataset.category; state.formDraft.categoryPicked = true; state.formDraft.ratings = {}; render(); }
     else if (action === 'set-rating') { state.formDraft.ratings[el.dataset.key] = Number(el.dataset.value); render(); }
     else if (action === 'trigger-library-input') document.getElementById('library-file-input').click();
     else if (action === 'trigger-camera-input') document.getElementById('camera-file-input').click();
     else if (action === 'remove-photo') {
       state.formDraft.photo = null; state.formDraft.thumb = null; state.formDraft.photoFile = null;
-      state.formDraft.aiResult = null; state.formDraft.aiError = null; state.formDraft.aiApplied = false;
+      state.formDraft.aiResult = null; state.formDraft.aiError = null;
+      state.formDraft.location = null; state.formDraft.takenAt = null;
+      state.formDraft.candidates = [];
       render();
     }
     else if (action === 'analyze-photo') analyzePhoto();
-    else if (action === 'apply-ai-name') applyAiName();
-    else if (action === 'apply-ai-info') applyAiInfo();
+    else if (action === 'analyze-name') analyzeName();
+    else if (action === 'apply-candidate') applyCandidate(el.dataset.name);
     else if (action === 'edit-drink') openEditForm(el.dataset.id);
     else if (action === 'ask-delete') { state.deleteConfirmId = el.dataset.id; render(); }
     else if (action === 'confirm-delete') deleteDrink(el.dataset.id);
     else if (action === 'change-name') openChangeName();
     else if (action === 'confirm-setup') confirmSetup();
     else if (action === 'cancel-setup') setView('list');
+    else if (action === 'switch-tab') { state.mainTab = el.dataset.tab; render(); }
   }
 
   function onRootKeydown(e) {
@@ -1048,8 +1432,12 @@
     if (!field) return;
     if (field === 'setupName') { state.setupDraftName = e.target.value; return; }
     if (!state.formDraft) return;
-    if (field === 'name') state.formDraft.name = e.target.value;
+    if (field === 'name') { state.formDraft.name = e.target.value; scheduleNameAnalysis(); }
     if (field === 'memo') state.formDraft.memo = e.target.value;
+    if (field === 'description') {
+      state.formDraft.description = e.target.value;
+      state.formDraft.descriptionFromAi = false;
+    }
   }
 
   function onRootChange(e) {
@@ -1071,13 +1459,15 @@
 
   sampleReady = (async function () {
     try { sample = await window.claude.use('sample'); } catch (e) { sample = null; }
+    state.sampleTextAvailable = !!sample;
     if (sample) {
       try {
         var limits = await sample.limits();
         state.sampleImagesAvailable = !!(limits && limits.images);
       } catch (e) { state.sampleImagesAvailable = false; }
     }
-    if (state.view === 'form' || state.view === 'editForm') render();
+    state.sampleChecked = true;
+    if (state.view === 'form' || state.view === 'editForm') syncAiUi();
   })();
 
   (async function init() {

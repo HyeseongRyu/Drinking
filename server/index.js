@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 
 import { db, formatRow } from './db.js';
 import { CATEGORIES, isValidCategory, computeOverallScore, validateRatings } from './categories.js';
+import { analyzePhoto, analyzeConfigured } from './analyze.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const uploadsDir = path.join(__dirname, 'uploads');
@@ -43,8 +44,37 @@ function deletePhotoFile(photoPath) {
   fs.unlink(filePath, () => {});
 }
 
+// 분석용 업로드는 디스크에 남길 이유가 없다 — 분석에만 쓰고 버린다.
+const analyzeUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 8 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    if (!file.mimetype.startsWith('image/')) {
+      return cb(new Error('이미지 파일만 업로드할 수 있습니다.'));
+    }
+    cb(null, true);
+  },
+});
+
 app.get('/api/categories', (req, res) => {
   res.json(CATEGORIES);
+});
+
+app.get('/api/analyze/status', (req, res) => {
+  res.json({ available: analyzeConfigured() });
+});
+
+app.post('/api/analyze', analyzeUpload.single('photo'), async (req, res) => {
+  if (!req.file) return res.status(400).json({ error: '사진을 첨부해주세요.' });
+
+  const { result, usage, error, status } = await analyzePhoto({
+    buffer: req.file.buffer,
+    mimeType: req.file.mimetype,
+    hint: typeof req.body.hint === 'string' ? req.body.hint.trim().slice(0, 100) : '',
+  });
+
+  if (error) return res.status(status).json({ error });
+  res.json({ ...result, usage });
 });
 
 app.get('/api/drinks', (req, res) => {
@@ -76,7 +106,7 @@ app.get('/api/drinks/:id', (req, res) => {
 });
 
 app.post('/api/drinks', upload.single('photo'), (req, res) => {
-  const { name, category, memo } = req.body;
+  const { name, category, memo, description } = req.body;
 
   if (!name || !name.trim()) return res.status(400).json({ error: '술 이름을 입력해주세요.' });
   if (!isValidCategory(category)) return res.status(400).json({ error: '잘못된 카테고리입니다.' });
@@ -97,10 +127,10 @@ app.post('/api/drinks', upload.single('photo'), (req, res) => {
 
   const info = db
     .prepare(
-      `INSERT INTO drinks (name, category, photo_path, memo, ratings, overall_score, is_favorite, created_at)
-       VALUES (?, ?, ?, ?, ?, ?, 0, ?)`
+      `INSERT INTO drinks (name, category, photo_path, memo, description, ratings, overall_score, is_favorite, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, 0, ?)`
     )
-    .run(name.trim(), category, photoPath, memo || '', JSON.stringify(ratings), overallScore, createdAt);
+    .run(name.trim(), category, photoPath, memo || '', description || '', JSON.stringify(ratings), overallScore, createdAt);
 
   const row = db.prepare('SELECT * FROM drinks WHERE id = ?').get(info.lastInsertRowid);
   res.status(201).json(formatRow(row));
@@ -128,6 +158,7 @@ app.patch('/api/drinks/:id', upload.single('photo'), (req, res) => {
   const overallScore = computeOverallScore(category, ratings);
   const name = req.body.name !== undefined ? req.body.name.trim() : existing.name;
   const memo = req.body.memo !== undefined ? req.body.memo : existing.memo;
+  const description = req.body.description !== undefined ? req.body.description : existing.description;
 
   let photoPath = existing.photo_path;
   if (req.file) {
@@ -136,8 +167,8 @@ app.patch('/api/drinks/:id', upload.single('photo'), (req, res) => {
   }
 
   db.prepare(
-    `UPDATE drinks SET name = ?, category = ?, photo_path = ?, memo = ?, ratings = ?, overall_score = ? WHERE id = ?`
-  ).run(name, category, photoPath, memo, JSON.stringify(ratings), overallScore, req.params.id);
+    `UPDATE drinks SET name = ?, category = ?, photo_path = ?, memo = ?, description = ?, ratings = ?, overall_score = ? WHERE id = ?`
+  ).run(name, category, photoPath, memo, description, JSON.stringify(ratings), overallScore, req.params.id);
 
   const row = db.prepare('SELECT * FROM drinks WHERE id = ?').get(req.params.id);
   res.json(formatRow(row));

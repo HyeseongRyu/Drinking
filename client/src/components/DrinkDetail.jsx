@@ -48,6 +48,13 @@ export default function DrinkDetail({ drink, categoryConfig, onBack, onEdit, onD
           ))}
         </div>
 
+        {drink.description && (
+          <div className="drink-memo">
+            <span className="field-label">설명</span>
+            <p>{drink.description}</p>
+          </div>
+        )}
+
         {drink.memo && (
           <div className="drink-memo">
             <span className="field-label">시음 메모</span>

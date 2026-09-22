@@ -30,14 +30,28 @@ export async function fetchDrink(id) {
   return handleJson(res);
 }
 
-function buildFormData({ name, category, memo, ratings, photoFile }) {
+function buildFormData({ name, category, memo, description, ratings, photoFile }) {
   const fd = new FormData();
   if (name !== undefined) fd.set('name', name);
   if (category !== undefined) fd.set('category', category);
   if (memo !== undefined) fd.set('memo', memo);
+  if (description !== undefined) fd.set('description', description);
   if (ratings !== undefined) fd.set('ratings', JSON.stringify(ratings));
   if (photoFile) fd.set('photo', photoFile);
   return fd;
+}
+
+export async function fetchAnalyzeStatus() {
+  const res = await fetch('/api/analyze/status');
+  return handleJson(res);
+}
+
+export async function analyzePhoto(photoFile, hint) {
+  const fd = new FormData();
+  fd.set('photo', photoFile);
+  if (hint) fd.set('hint', hint);
+  const res = await fetch('/api/analyze', { method: 'POST', body: fd });
+  return handleJson(res);
 }
 
 export async function createDrink(payload) {
